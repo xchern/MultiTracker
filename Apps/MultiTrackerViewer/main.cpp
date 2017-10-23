@@ -7,6 +7,10 @@
 #include <OpenGL/glu.h>
 #include <GLUT/glut.h>
 #else
+#ifdef _MSC_VER
+#define NOMINMAX
+#include <windows.h>
+#endif
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
@@ -315,7 +319,7 @@ int main(int argc, char * argv[])
     g_playback.rec_directory = argv[1];
     
     glutInit(&argc, argv);
-    
+
     glutInitWindowPosition(0, 0);
     glutInitWindowSize(800, 800);
     glutCreateWindow("MultiTrackerViewer");
@@ -348,10 +352,13 @@ int main(int argc, char * argv[])
     std::vector<LosTopos::Vec3d> ms(3); ms[0] = LosTopos::Vec3d(1, 1, 1); ms[1] = LosTopos::Vec3d(1, 1, 1); ms[2] = LosTopos::Vec3d(1, 1, 1);
     std::vector<LosTopos::Vec3st> fs(1); fs[0] = LosTopos::Vec3st(0, 1, 2);
     std::vector<LosTopos::Vec2i> ls(1); ls[0] = LosTopos::Vec2i(0, 1);
+    
     g_playback.st = new LosTopos::SurfTrack(vs, fs, ls, ms, stip);
     bool success = MeshIO::load(*g_playback.st, g_playback.rec_directory + "/mesh000000.rec");
-    if (success) std::cout << "Frame " << g_playback.rec_directory << "/mesh000000.rec loaded: nv = " << g_playback.st->m_mesh.nv() << " ne = " << g_playback.st->m_mesh.ne() << " nf = " << g_playback.st->m_mesh.nt() << std::endl;
     
+    if (success) std::cout << "Frame " << g_playback.rec_directory << "/mesh000000.rec loaded: nv = " << g_playback.st->m_mesh.nv() << " ne = " << g_playback.st->m_mesh.ne() << " nf = " << g_playback.st->m_mesh.nt() << std::endl;
+    else std::cout << "Failed load.\n";
+
     int nregions = 0;
     for (size_t i = 0; i < g_playback.st->m_mesh.nt(); i++)
     {

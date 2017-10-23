@@ -74,10 +74,10 @@ bool MeshIO::load(LosTopos::SurfTrack & st, const std::string & filename, bool b
     std::ifstream test(filename.c_str());
     if (!test.is_open())
     {
-        std::cout << "[MeshIO::load] Error: file " << filename << " not found." << std::endl;
+        std::cout << "[MeshIO::load] Error: file " << filename.c_str() << " not found." << std::endl;
         return false;
     }
-    
+
     for (size_t i = 0; i < st.m_mesh.nt(); i++)
     {
         if (st.m_mesh.get_triangle(i)[0] == st.m_mesh.get_triangle(i)[1])
@@ -91,7 +91,7 @@ bool MeshIO::load(LosTopos::SurfTrack & st, const std::string & filename, bool b
     if (binary)
     {
         std::ifstream is(filename.c_str(), std::ios::binary);
-        
+
         size_t n;
         n = st.m_mesh.nv();
         is.read((char *)&n, sizeof (size_t));

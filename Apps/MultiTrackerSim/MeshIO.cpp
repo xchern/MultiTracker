@@ -74,7 +74,7 @@ bool MeshIO::load(LosTopos::SurfTrack & st, const std::string & filename, bool b
     std::ifstream test(filename.c_str());
     if (!test.is_open())
     {
-        std::cout << "[MeshIO::load] Error: file " << filename << " not found." << std::endl;
+        std::cout << "[MeshIO::load] Error: file " << filename.c_str() << " not found." << std::endl;
         return false;
     }
     
@@ -205,7 +205,7 @@ bool MeshIO::loadIntoRaw(std::vector<LosTopos::Vec3d> & vs, std::vector<LosTopos
     std::ifstream test(filename.c_str());
     if (!test.is_open())
     {
-        std::cout << "[MeshIO::load] Error: file " << filename << " not found." << std::endl;
+        std::cout << "[MeshIO::load] Error: file " << filename.c_str() << " not found." << std::endl;
         return false;
     }
     

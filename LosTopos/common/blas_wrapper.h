@@ -6,6 +6,7 @@
 #include <cstring>
 #include <vector>
 
+
 // Useful dense kernels from BLAS, with readable, overloaded, cross-platform names and some simplified calling
 //  dot    (dot-product of vectors)
 //  nrm2   (2-norm of a vector)
@@ -366,7 +367,7 @@ namespace BLAS{
 #elif defined USE_CBLAS || defined __APPLE__
 
 #ifdef USE_CBLAS
-#include <cblas.h>
+#include "mkl_cblas.h"
 #elif defined __APPLE__
 #include <vecLib/cblas.h>
 #endif
@@ -417,10 +418,10 @@ namespace BLAS{
     // inf-norm (maximum absolute value)
     
     inline int index_abs_max(int n, const float *x, int incx=1)
-    { return cblas_isamax(n, x, incx); }
+    { return (int)cblas_isamax(n, x, incx); }
     
     inline int index_abs_max(int n, const double *x, int incx=1)
-    { return cblas_idamax(n, x, incx); }
+    { return (int)cblas_idamax(n, x, incx); }
     
     inline float abs_max(int n, const float *x, int incx=1)
     { return std::fabs(x[cblas_isamax(n, x, incx)]); }

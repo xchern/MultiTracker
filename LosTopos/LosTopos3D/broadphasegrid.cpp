@@ -64,7 +64,7 @@ void BroadPhaseGrid::build_acceleration_grid( AccelerationGrid& grid,
     
     Vec3st dims(1,1,1);
     
-    const size_t MAX_D = 2000;
+    const size_t MAX_D = 500;
     
     if(mag(xmax-xmin) > grid_padding)
     {
