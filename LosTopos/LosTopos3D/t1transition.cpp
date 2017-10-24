@@ -557,9 +557,9 @@ double T1Transition::try_pull_vertex_apart_using_surface_tension(size_t xj, int 
         size_t other_edge = static_cast<size_t>(~0);
         for (l = 0; l < 3; l++)
         {
-            if (mesh.m_edges[mesh.m_triangle_to_edge_map[triangle][l]][0] != xj &&
-                mesh.m_edges[mesh.m_triangle_to_edge_map[triangle][l]][1] != xj)
-                other_edge = mesh.m_triangle_to_edge_map[triangle][l];
+            if (mesh.m_edges[mesh.m_triangle_to_edge_map[triangle][(int)l]][0] != xj &&
+               mesh.m_edges[mesh.m_triangle_to_edge_map[triangle][(int)l]][1] != xj)
+               other_edge = mesh.m_triangle_to_edge_map[triangle][(int)l];
         }
         assert(other_edge < mesh.ne());
         size_t v0 = mesh.m_edges[other_edge][0];
@@ -587,10 +587,10 @@ double T1Transition::try_pull_vertex_apart_using_surface_tension(size_t xj, int 
     Vec3d centroidB(0, 0, 0);
     for (size_t i = 0; i < vertsA.size(); i++)
         centroidA += vertsA[i];
-    centroidA /= vertsA.size();
+    centroidA /= (double)vertsA.size();
     for (size_t i = 0; i < vertsB.size(); i++)
         centroidB += vertsB[i];
-    centroidB /= vertsB.size();
+    centroidB /= (double)vertsB.size();
     
     // the pull apart direction is along the line between the two centroids
     pull_apart_direction = (centroidA - centroidB);
@@ -675,9 +675,9 @@ double T1Transition::try_pull_vertex_apart_using_velocity_field(size_t xj, int A
         size_t other_edge = static_cast<size_t>(~0);
         for (l = 0; l < 3; l++)
         {
-            if (mesh.m_edges[mesh.m_triangle_to_edge_map[triangle][l]][0] != xj &&
-                mesh.m_edges[mesh.m_triangle_to_edge_map[triangle][l]][1] != xj)
-                other_edge = mesh.m_triangle_to_edge_map[triangle][l];
+            if (mesh.m_edges[mesh.m_triangle_to_edge_map[triangle][(int)l]][0] != xj &&
+               mesh.m_edges[mesh.m_triangle_to_edge_map[triangle][(int)l]][1] != xj)
+               other_edge = mesh.m_triangle_to_edge_map[triangle][(int)l];
         }
         assert(other_edge < mesh.ne());
         size_t v0 = mesh.m_edges[other_edge][0];
@@ -705,10 +705,10 @@ double T1Transition::try_pull_vertex_apart_using_velocity_field(size_t xj, int A
     Vec3d centroidB(0, 0, 0);
     for (size_t i = 0; i < vertsA.size(); i++)
         centroidA += vertsA[i];
-    centroidA /= vertsA.size();
+    centroidA /= (double)vertsA.size();
     for (size_t i = 0; i < vertsB.size(); i++)
         centroidB += vertsB[i];
-    centroidB /= vertsB.size();
+    centroidB /= (double)vertsB.size();
     
     // the pull apart direction is along the line between the two centroids
     pull_apart_direction = (centroidA - centroidB);
@@ -761,7 +761,7 @@ void T1Transition::triangulate_popped_vertex(size_t xj, int A, int B, size_t a, 
         size_t edge2 = static_cast<size_t>(~0);
         for (l = 0; l < 3; l++)
         {
-            size_t e = mesh.m_triangle_to_edge_map[triangle][l];
+            size_t e = mesh.m_triangle_to_edge_map[triangle][(int)l];
             if (mesh.m_edges[e][0] != xj && mesh.m_edges[e][1] != xj)
                 edge2 = e;
         }

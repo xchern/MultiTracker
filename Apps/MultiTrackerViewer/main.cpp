@@ -67,10 +67,10 @@ void display()
     
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glTranslatef(0.0f, 0.0f, -g_view.dist);
-    glRotatef(g_view.alpha * 180 / M_PI, 1, 0, 0);
-    glRotatef(g_view.theta * 180 / M_PI, 0, 1, 0);
-    glTranslatef(-0.5, -0.5, -0.5);
+    glTranslated(0.0f, 0.0f, -g_view.dist);
+    glRotated(g_view.alpha * 180 / M_PI, 1, 0, 0);
+    glRotated(g_view.theta * 180 / M_PI, 0, 1, 0);
+    glTranslated(-0.5, -0.5, -0.5);
     glPushMatrix();
     
 //    // coordinate frame
@@ -107,10 +107,10 @@ void reshape(int w, int h)
     glFrustum(-0.1 * ar, 0.1 * ar, -0.1, 0.1, 0.3, 10);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glTranslatef(0, 0, -g_view.dist);
-    glRotatef(g_view.alpha * 180 / M_PI, 1, 0, 0);
-    glRotatef(g_view.theta * 180 / M_PI, 0, 1, 0);
-    glTranslatef(-0.5, -0.5, -0.5);
+    glTranslated(0, 0, -g_view.dist);
+    glRotated(g_view.alpha * 180 / M_PI, 1, 0, 0);
+    glRotated(g_view.theta * 180 / M_PI, 0, 1, 0);
+    glTranslated(-0.5, -0.5, -0.5);
     
     glEnable(GL_DEPTH_TEST);
 }
