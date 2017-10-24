@@ -7,7 +7,7 @@
 //  Encapsulates two impact zone solvers: inelastic impact zones, and rigid impact zones.
 //
 // ---------------------------------------------------------
-
+#include <Eigen/IterativeLinearSolvers>
 #include <collisionpipeline.h>
 #include <dynamicsurface.h>
 #include <impactzonesolver.h>
@@ -291,7 +291,8 @@ bool ImpactZoneSolver::inelastic_projection( const ImpactZone& iz )
     
     SparseMatrixDynamicCSR GCT( to_int(3*n), to_int(k) );
     GCT.set_zero();
-    
+    std::vector<Eigen::Triplet<double>> GCT_triplets;
+
     // construct matrix grad C transpose
     for ( int i = 0; i < to_int(k); ++i )
     {
@@ -313,6 +314,10 @@ bool ImpactZoneSolver::inelastic_projection( const ImpactZone& iz )
             GCT(mat_j*3+1, i) = coll.m_alphas[v] * coll.m_normal[1];
             GCT(mat_j*3+2, i) = coll.m_alphas[v] * coll.m_normal[2];
             
+            //Eigen version
+            GCT_triplets.push_back(Eigen::Triplet<double>(mat_j * 3, i, coll.m_alphas[v] * coll.m_normal[0]));
+            GCT_triplets.push_back(Eigen::Triplet<double>(mat_j * 3+1, i, coll.m_alphas[v] * coll.m_normal[1]));
+            GCT_triplets.push_back(Eigen::Triplet<double>(mat_j * 3+2, i, coll.m_alphas[v] * coll.m_normal[2]));
         }
     }
     
@@ -320,7 +325,9 @@ bool ImpactZoneSolver::inelastic_projection( const ImpactZone& iz )
     inv_masses.reserve(3*(unsigned long)n);
     Array1d column_velocities;
     column_velocities.reserve(3*(unsigned long)n);
-    
+    std::vector<Eigen::Triplet<double>> inv_masses_triplets;
+    Eigen::VectorXd column_velocities_Eigen(n*3);
+
     for ( size_t i = 0; i < n; ++i )
     {
         
@@ -331,6 +338,14 @@ bool ImpactZoneSolver::inelastic_projection( const ImpactZone& iz )
         column_velocities.push_back( m_surface.m_velocities[zone_vertices[i]][0] );
         column_velocities.push_back( m_surface.m_velocities[zone_vertices[i]][1] );
         column_velocities.push_back( m_surface.m_velocities[zone_vertices[i]][2] );
+
+        //Eigen version
+        inv_masses_triplets.push_back(Eigen::Triplet<double>(3 * i, 3 * i, 1.0 / m_surface.m_masses[zone_vertices[i]][0]));
+        inv_masses_triplets.push_back(Eigen::Triplet<double>(3 * i + 1, 3 * i + 1, 1.0 / m_surface.m_masses[zone_vertices[i]][1]));
+        inv_masses_triplets.push_back(Eigen::Triplet<double>(3 * i + 2, 3 * i + 2, 1.0 / m_surface.m_masses[zone_vertices[i]][2]));
+        column_velocities_Eigen[3 * i] = m_surface.m_velocities[zone_vertices[i]][0];
+        column_velocities_Eigen[3 * i + 1] = m_surface.m_velocities[zone_vertices[i]][1];
+        column_velocities_Eigen[3 * i + 2] = m_surface.m_velocities[zone_vertices[i]][2];
     }
     
     //
@@ -344,14 +359,25 @@ bool ImpactZoneSolver::inelastic_projection( const ImpactZone& iz )
     
     // normal equations: GC * M^(-1) GCT * x = GC * v
     //                   A * x = b
-    
     SparseMatrixDynamicCSR A( to_int(k), to_int(k) );
     A.set_zero();
-    AtDB( GCT, inv_masses.data, GCT, A ); 
-    
+    AtDB(GCT, inv_masses.data, GCT, A);
+
     Array1d b((unsigned long)k);
-    GCT.apply_transpose( column_velocities.data, b.data );   
+    GCT.apply_transpose(column_velocities.data, b.data);
+
+    Eigen::SparseMatrix<double, Eigen::RowMajor> minv_Eigen(3 * n, 3 * n);
+    minv_Eigen.setFromTriplets(inv_masses_triplets.begin(), inv_masses_triplets.end());
+    Eigen::SparseMatrix<double, Eigen::RowMajor> GCT_Eigen(3 * n, k);
+    GCT_Eigen.setFromTriplets(GCT_triplets.begin(), GCT_triplets.end());
+    Eigen::SparseMatrix<double, Eigen::RowMajor> A_Eigen(k, k);
+    //Eigen::SparseMatrix<double, Eigen::RowMajor> temp();
+    A_Eigen = GCT_Eigen.transpose()*minv_Eigen*GCT_Eigen;
     
+    Eigen::VectorXd x_Eigen(k);
+    
+    Eigen::VectorXd b_Eigen = GCT_Eigen.transpose()*column_velocities_Eigen;
+
     if ( m_surface.m_verbose )  { std::cout << "system built" << std::endl; }
     
     MINRES_CR_Solver solver;   
@@ -359,6 +385,24 @@ bool ImpactZoneSolver::inelastic_projection( const ImpactZone& iz )
     solver.max_iterations = 1000;
     solver_result = solver.solve( solver_matrix, b.data, x.data ); 
     
+    Eigen::BiCGSTAB<Eigen::SparseMatrix<double, Eigen::RowMajor>> bicgsolver;
+    bicgsolver.compute(A_Eigen);
+    if (bicgsolver.info() != Eigen::Success) {
+       std::cout << "SOLVER FAIL\n" << std::endl;
+    }
+
+    bicgsolver.setMaxIterations(1000);
+    bicgsolver.setTolerance(1e-9);
+    x_Eigen = bicgsolver.solve(b_Eigen);
+
+    if (bicgsolver.info() != Eigen::Success) {
+       std::cout << "SOLVER FAIL\n" << std::endl;
+       std::cout << "Iterations: " << bicgsolver.iterations() << std::endl;
+       std::cout << "Error: " << bicgsolver.error() << std::endl;
+       return false;
+    }
+
+    /*
     if ( solver_result != KRYLOV_CONVERGED )
     {
         if ( m_surface.m_verbose )
@@ -380,23 +424,32 @@ bool ImpactZoneSolver::inelastic_projection( const ImpactZone& iz )
         
         return false;          
     } 
-    
+    */
+
     // apply impulses 
     Array1d applied_impulses(3*(unsigned long)n);
     GCT.apply( x.data, applied_impulses.data );
     
+    Eigen::VectorXd applied_impulses_Eigen(3 * (unsigned long)n);
+    applied_impulses_Eigen = GCT_Eigen*x_Eigen;
+
     static const double IMPULSE_MULTIPLIER = 0.8;
     
     for ( size_t i = 0; i < applied_impulses.size(); ++i )
     {
-        column_velocities[(unsigned long)i] -= IMPULSE_MULTIPLIER * inv_masses[(unsigned long)i] * applied_impulses[(unsigned long)i];      
+       column_velocities[(unsigned long)i] -= IMPULSE_MULTIPLIER * inv_masses[(unsigned long)i] * applied_impulses[(unsigned long)i];      
+       //column_velocities_Eigen[(unsigned long)i] -= IMPULSE_MULTIPLIER * inv_masses[(unsigned long)i] * applied_impulses_Eigen[(unsigned long)i];
     }
     
     for ( size_t i = 0; i < n; ++i )
     {
         m_surface.m_velocities[zone_vertices[i]][0] = column_velocities[3*(unsigned long)i];
         m_surface.m_velocities[zone_vertices[i]][1] = column_velocities[3*(unsigned long)i + 1];
-        m_surface.m_velocities[zone_vertices[i]][2] = column_velocities[3*(unsigned long)i + 2];      
+        m_surface.m_velocities[zone_vertices[i]][2] = column_velocities[3*(unsigned long)i + 2];  
+
+        /*  m_surface.m_velocities[zone_vertices[i]][0] = column_velocities_Eigen[3 * (unsigned long)i];
+          m_surface.m_velocities[zone_vertices[i]][1] = column_velocities_Eigen[3 * (unsigned long)i + 1];
+          m_surface.m_velocities[zone_vertices[i]][2] = column_velocities_Eigen[3 * (unsigned long)i + 2];*/
     }
     
     
@@ -413,7 +466,7 @@ bool ImpactZoneSolver::inelastic_projection( const ImpactZone& iz )
 
 bool ImpactZoneSolver::inelastic_impact_zones(double dt)
 {
-    
+   
     // copy
     std::vector<Vec3d> old_velocities = m_surface.m_velocities;
     
@@ -519,7 +572,7 @@ bool ImpactZoneSolver::inelastic_impact_zones(double dt)
         }
         
     }
-    
+   
     return true;
     
 }
