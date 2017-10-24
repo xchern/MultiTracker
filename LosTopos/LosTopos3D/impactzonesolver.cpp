@@ -302,9 +302,9 @@ bool ImpactZoneSolver::inelastic_projection( const ImpactZone& iz )
         inv_masses.push_back( 1.0 / m_surface.m_masses[zone_vertices[i]][1] );
         inv_masses.push_back( 1.0 / m_surface.m_masses[zone_vertices[i]][2] );
     
-        inv_masses_triplets.push_back(Eigen::Triplet<double>(3 * i, 3 * i, 1.0 / m_surface.m_masses[zone_vertices[i]][0]));
-        inv_masses_triplets.push_back(Eigen::Triplet<double>(3 * i + 1, 3 * i + 1, 1.0 / m_surface.m_masses[zone_vertices[i]][1]));
-        inv_masses_triplets.push_back(Eigen::Triplet<double>(3 * i + 2, 3 * i + 2, 1.0 / m_surface.m_masses[zone_vertices[i]][2]));
+        inv_masses_triplets.push_back(Eigen::Triplet<double>(3 * (int)i, 3 * (int)i, 1.0 / m_surface.m_masses[zone_vertices[i]][0]));
+        inv_masses_triplets.push_back(Eigen::Triplet<double>(3 * (int)i + 1, 3 * (int)i + 1, 1.0 / m_surface.m_masses[zone_vertices[i]][1]));
+        inv_masses_triplets.push_back(Eigen::Triplet<double>(3 * (int)i + 2, 3 * (int)i + 2, 1.0 / m_surface.m_masses[zone_vertices[i]][2]));
         column_velocities_Eigen[3 * i] = m_surface.m_velocities[zone_vertices[i]][0];
         column_velocities_Eigen[3 * i + 1] = m_surface.m_velocities[zone_vertices[i]][1];
         column_velocities_Eigen[3 * i + 2] = m_surface.m_velocities[zone_vertices[i]][2];
