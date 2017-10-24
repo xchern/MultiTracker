@@ -67,7 +67,7 @@ void display()
     
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glTranslatef(0, 0, -g_view.dist);
+    glTranslatef(0.0f, 0.0f, -g_view.dist);
     glRotatef(g_view.alpha * 180 / M_PI, 1, 0, 0);
     glRotatef(g_view.theta * 180 / M_PI, 0, 1, 0);
     glTranslatef(-0.5, -0.5, -0.5);

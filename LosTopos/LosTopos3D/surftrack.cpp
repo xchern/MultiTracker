@@ -24,7 +24,6 @@
 #include <collisionqueries.h>
 #include <edgeflipper.h>
 #include <impactzonesolver.h>
-#include <lapack_wrapper.h>
 #include <nondestructivetrimesh.h>
 #include <queue>
 #include <runstats.h>
