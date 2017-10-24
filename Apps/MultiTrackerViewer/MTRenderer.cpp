@@ -121,7 +121,7 @@ namespace
 
     int junction(const LosTopos::NonDestructiveTriMesh & mesh, size_t e)
     {
-        return mesh.m_edge_to_triangle_map[e].size();
+        return (int)mesh.m_edge_to_triangle_map[e].size();
     }
 
     bool junctionNeighborV(const LosTopos::NonDestructiveTriMesh & mesh, size_t v)
@@ -147,7 +147,7 @@ namespace
     bool junctionNeighborF(const LosTopos::NonDestructiveTriMesh & mesh, size_t f)
     {
         for (size_t i = 0; i < 3; i++)
-            if (junctionNeighborV(mesh, mesh.m_tris[f][i]))
+            if (junctionNeighborV(mesh, mesh.m_tris[f][(int)i]))
                 return true;
         
         return false;
@@ -290,7 +290,7 @@ void MTRenderer::render()
         if (distance < mind || mind < 0)
         {
             mind = distance;
-            mind_vertex = i;
+            mind_vertex = (int)i;
         }
     }
     
@@ -313,7 +313,7 @@ void MTRenderer::render()
         {
             mind = distance;
             mind_vertex = -1;
-            mind_edge = i;
+            mind_edge = (int)i;
         }
     }
     
@@ -339,7 +339,7 @@ void MTRenderer::render()
             mind = distance;
             mind_vertex = -1;
             mind_edge = -1;
-            mind_face = i;
+            mind_face = (int)i;
         }
     }
     
@@ -428,24 +428,24 @@ void MTRenderer::render()
             //Vec3d dir = (p1-p0);
             //p0 = p0 + 0.05*dir;
             //p1 = p1 - 0.05*dir;
-            glColor4f(0.0, 0.0, 0.0, 0.2);
+            glColor4f(0.0f, 0.0f, 0.0f, 0.2f);
             
             if (m_mode == RM_JUNCTIONS)
             {
                 int ne = junction(mesh, i);
                 if (ne == 3)
-                    glColor4f(1.0, 0.0, 1.0, 0.2);
+                    glColor4f(1.0f, 0.0f, 1.0f, 0.2f);
                 else if (ne == 4)
-                    glColor4f(0.3, 0.8, 0.9, 0.2);
+                    glColor4f(0.3f, 0.8f, 0.9f, 0.2f);
                 else if (ne > 4)
-                    glColor4f(0.2, 0.3, 1.0, 0.2);
+                    glColor4f(0.2f, 0.3f, 1.0f, 0.2f);
             }
             
             if ((p0 - p1).norm() <= 0.1)
-                glColor4f(0.0, 0.5, 1.0, 1.0);
+                glColor4f(0.0f, 0.5f, 1.0f, 1.0f);
             
             if (!visibleE(i))
-                glColor4f(0.0, 0.0, 0.0, 0.1);
+                glColor4f(0.0f, 0.0f, 0.0f, 0.1f);
             
             glVertexVec3d(p0);
             glVertexVec3d(p1);
@@ -454,7 +454,7 @@ void MTRenderer::render()
         
         if (mind_edge >= 0)
         {
-            glColor4f(0.0, 0.0, 0.0, 1.0);
+            glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
             glLineWidth(4);
             glBegin(GL_LINES);
             glVertexVec3d(Vec(m_st->get_position(mesh.m_edges[mind_edge][0])));
@@ -569,10 +569,10 @@ void MTRenderer::render()
             barycentre /= 3.0;
             
             double alpha = 0.1;
-            glColor4f(1.0, 0.0, 0.0, alpha);
+            glColor4f(1.0f, 0.0f, 0.0f, (float)alpha);
             
             if (!visibleF(sorted_faces[i].first))
-                glColor4f(0.0, 0.0, 0.0, 0.02);
+                glColor4f(0.0f, 0.0f, 0.0f, 0.02f);
             
             double edge_shrink = 0.1;
             
@@ -650,15 +650,15 @@ void MTRenderer::render()
                     continue;
             
             if (minedge < 0.01)
-                glColor4f(1.0, 1.0, 0.0, 1.0);
+                glColor4f(1.0f, 1.0f, 0.0f, 1.0f);
             else if (minangle < 3 * M_PI / 180)
-                glColor4f(0.0, 1.0, 1.0, 1.0);
+                glColor4f(0.0f, 1.0f, 1.0f, 1.0f);
             else if (maxangle > 177 * M_PI / 180)
-                glColor4f(1.0, 0.0, 1.0, 1.0);
+                glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
             else if(onBBWall(vertPos))
-                glColor4f(0.0, 1.0, 0.0, 1.0);
+                glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
             else
-                glColor4f(0.0, 0.0, 0.0, 0.1);
+                glColor4f(0.0f, 0.0f, 0.0f, 0.1f);
             
             glVertexVec3d(vertPos);
         }
@@ -848,10 +848,10 @@ void MTRenderer::render()
             else
                 color_combined /= visible_count;
             
-            glColor4f(color_combined.x(), color_combined.y(), color_combined.z(), alpha);
+            glColor4d(color_combined.x(), color_combined.y(), color_combined.z(), alpha);
             
             if (sorted_faces[i].first == mind_face)
-                glColor4f(color_combined.x(), color_combined.y(), color_combined.z(), 1.0);
+                glColor4d(color_combined.x(), color_combined.y(), color_combined.z(), 1.0);
             
             for (int j = 0; j < 3; j++)
             {
@@ -1029,10 +1029,10 @@ void MTRenderer::render()
                 continue; // neither region visible: don't render this face at all
             }
             
-            glColor3f(0.4 + 0.6 * color_final.x(), 0.4 + 0.6 * color_final.y(), 0.4 + 0.6 * color_final.z());
+            glColor3d(0.4 + 0.6 * color_final.x(), 0.4 + 0.6 * color_final.y(), 0.4 + 0.6 * color_final.z());
             
             if (i == mind_face)
-                glColor3f(color_final.x() * 0.6, color_final.y() * 0.6, color_final.z() * 0.6);
+                glColor3d(color_final.x() * 0.6, color_final.y() * 0.6, color_final.z() * 0.6);
             
             glVertexVec3d(x0);
             glVertexVec3d(x1);
