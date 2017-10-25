@@ -9,11 +9,10 @@
 // ---------------------------------------------------------
 
 #include <trianglequality.h>
+
 #include <limits>
 #include <surftrack.h>
 #include <set>
-
-#include "lapack_wrapper.h"
 #include <Eigen/Core>
 #include <Eigen/Eigenvalues>
 // ---------------------------------------------------------
@@ -275,11 +274,12 @@ double estimated_max_curvature(const SurfTrack& surf, size_t vertex) {
     int numneighbors = (int)twoneighbors.size();
     if(numneighbors < 6)
         return 0;
+    //TODO I havn't fully verified this after porting to Eigen, so user beware!
 
     //a u^2 + b v^2 + c uv + d u + e v + f
-
-    std::vector<double> Mat(numneighbors*6);
-    std::vector<double> rhs(numneighbors);
+    Eigen::MatrixXd Mat_Eigen(numneighbors, 6);
+    Eigen::VectorXd Rhs_Eigen(numneighbors);
+    
     Vec3d centpt = surf.get_position(vertex);
     int row=0;
     for(std::set<size_t>::iterator it = twoneighbors.begin(); it != twoneighbors.end(); ++it)
@@ -291,29 +291,23 @@ double estimated_max_curvature(const SurfTrack& surf, size_t vertex) {
             diff[i] = adjpt[i]-centpt[i];
         double uval = dot(diff,u);
         double vval = dot(diff,v);
-        rhs[row] = dot(diff,normal);
-        /*Mat[row*numneighbors] = uval*uval;
-        Mat[row*numneighbors+1] = vval*vval;
-        Mat[row*numneighbors+2] = uval*vval;
-        Mat[row*numneighbors+3] = uval;
-        Mat[row*numneighbors+4] = vval;
-        Mat[row*numneighbors+5] = 1;*/
-        Mat[0*numneighbors + row] = uval*uval;
-        Mat[1*numneighbors + row] = vval*vval;
-        Mat[2*numneighbors + row] = uval*vval;
-        Mat[3*numneighbors + row] = uval;
-        Mat[4*numneighbors + row] = vval;
-        Mat[5*numneighbors + row] = 1;
+        Rhs_Eigen[row] = dot(diff, normal);
+    
+        Mat_Eigen(row, 0) = uval*uval;
+        Mat_Eigen(row, 1) = vval*vval;
+        Mat_Eigen(row, 2) = uval*vval;
+        Mat_Eigen(row, 3) = uval;
+        Mat_Eigen(row, 4) = vval;
+        Mat_Eigen(row, 5) = 1;
+
         row++;
     }
     assert(row == numneighbors);
 
-    int info;
-    int rank;
-    double rcond = 0;
-    LAPACK::simple_least_squares_svd(numneighbors, 6, 1, &Mat[0], numneighbors, &rhs[0], info, rcond, rank);
+    Eigen::VectorXd soln_Eigen = Mat_Eigen.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(Rhs_Eigen);
+
     std::vector<double> coeffs(6);
-    for(int id = 0; id < 6; ++id) coeffs[id] = rhs[id];
+    for(int id = 0; id < 6; ++id) coeffs[id] = Rhs_Eigen[id];
   
     double areaElt = sqrt(1+coeffs[3]*coeffs[3]+coeffs[4]*coeffs[4]);
     Vec3d newnormal = (normal - coeffs[3]*u - coeffs[4]*v) / areaElt;
