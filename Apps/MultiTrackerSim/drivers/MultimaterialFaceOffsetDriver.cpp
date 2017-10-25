@@ -10,11 +10,15 @@
 #include "MultimaterialFaceOffsetDriver.h"
 
 #include <cassert>
-#include <lapack_wrapper.h>
+
+#include <Eigen/Core>
+#include <Eigen/Eigenvalues>
 #include <meshsmoother.h>
 #include <nondestructivetrimesh.h>
 #include <runstats.h>
 #include <surftrack.h>
+#include <Eigen/Core>
+#include <Eigen/Eigenvalues>
 
 using namespace LosTopos;
 
@@ -108,38 +112,50 @@ void MultimaterialFaceOffsetDriver::intersection_point(const std::vector<Vec3d> 
         d.push_back( triangle_plane_distances[triangle_index] );
     }
     
+    Eigen::Matrix3d A_Eigen;
+    A_Eigen.setZero();
+    Eigen::Vector3d b_Eigen;
+    b_Eigen.setZero();
+
     Mat33d A(0,0,0,0,0,0,0,0,0);
     Vec3d b(0,0,0);
     
     compute_quadric_metric_tensor( triangle_normals, triangle_areas, reduced_tris, A );
-    
+    A_Eigen(0, 0) = A(0, 0); 
+    A_Eigen(1, 0) = A(1, 0);
+    A_Eigen(2, 0) = A(2, 0);
+    A_Eigen(0, 1) = A(0, 1);
+    A_Eigen(1, 1) = A(1, 1);
+    A_Eigen(2, 1) = A(2, 1);
+    A_Eigen(0, 2) = A(0, 2);
+    A_Eigen(1, 2) = A(1, 2);
+    A_Eigen(2, 2) = A(2, 2);
     for ( size_t i = 0; i < N.size(); ++i )
     {
-        
         b[0] += N[i][0] * W[i] * d[i];
         b[1] += N[i][1] * W[i] * d[i];
         b[2] += N[i][2] * W[i] * d[i];      
+        b_Eigen[0] += N[i][0] * W[i] * d[i];
+        b_Eigen[1] += N[i][1] * W[i] * d[i];
+        b_Eigen[2] += N[i][2] * W[i] * d[i];
     }
     
-    double eigenvalues[3];
-    double work[9];
-    int info = ~0, n = 3, lwork = 9;
-    LAPACK::get_eigen_decomposition( &n, A.a, &n, eigenvalues, work, &lwork, &info );
-    
-    if ( info != 0 )
-    {
-        assert(0);
-    }
-    
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> es;
+    es.compute(A_Eigen, Eigen::ComputeEigenvectors);
+    if (es.info() != Eigen::Success) assert(0);
+    auto eigenvalues_Eigen = es.eigenvalues();
+    auto eigenvectors_Eigen = es.eigenvectors();
+    double eig_max = std::max(eigenvalues_Eigen[0], std::max(eigenvalues_Eigen[1], eigenvalues_Eigen[2]));
+
     Vec3d displacement_vector(0,0,0);
     
     for ( unsigned int i = 0; i < 3; ++i )
     {
-        if ( eigenvalues[i] > G_EIGENVALUE_RANK_RATIO * eigenvalues[2] )
-        {
-            Vec3d eigenvector( A(0,i), A(1,i), A(2,i) );
-            displacement_vector += dot(eigenvector, b) * eigenvector / eigenvalues[i];
-        }
+        
+       if (eigenvalues_Eigen[i] > G_EIGENVALUE_RANK_RATIO * eig_max) {
+          Vec3d eigenvector(eigenvectors_Eigen.col(i)[0], eigenvectors_Eigen.col(i)[1], eigenvectors_Eigen.col(i)[2]);
+          displacement_vector += dot(eigenvector, b) * eigenvector / eigenvalues_Eigen[i];
+       }
     }
     
     out = displacement_vector;
