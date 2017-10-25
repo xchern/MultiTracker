@@ -16,8 +16,8 @@
 #include <runstats.h>
 #include <surftrack.h>
 #include <trianglequality.h>
-
-#include <lapack_wrapper.h>
+#include <Eigen/Core>
+#include <Eigen/Eigenvalues>
 
 // ---------------------------------------------------------
 //  Extern globals
@@ -566,16 +566,24 @@ bool EdgeFlipper::is_Delaunay_anisotropic( size_t edge, size_t tri0, size_t tri1
     //sum them to get a combined quadric tensor A for the patch
     Mat33d A = mat0 + mat1 + mat2 + mat3;
     
-    //perform eigen decomposition to determine the eigen vectors/values
-    double eigenvalues[3];
-    double work[9];
-    int info = ~0, n = 3, lwork = 9;
-    LAPACK::get_eigen_decomposition( &n, A.a, &n, eigenvalues, work, &lwork, &info );
-    
+    Eigen::Matrix3d A_Eigen;
+    A_Eigen << A(0, 0), A(0, 1), A(0, 2), A(1, 0), A(1, 1), A(1, 2), A(2, 0), A(2, 1), A(2, 2);
+
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> es;
+    es.compute(A_Eigen, Eigen::ComputeEigenvectors);
+    if (es.info() != Eigen::Success) assert(0);
+    auto eigenvalues_Eigen = es.eigenvalues();
+    auto eigenvectors_Eigen = es.eigenvectors();
+
+    double eig_max = std::max(eigenvalues_Eigen[0], std::max(eigenvalues_Eigen[1], eigenvalues_Eigen[2]));
+    double eig_min = std::min(eigenvalues_Eigen[0], std::min(eigenvalues_Eigen[1], eigenvalues_Eigen[2]));
+    double eig_mid = std::max(min(eigenvalues_Eigen[0], eigenvalues_Eigen[1]), min(max(eigenvalues_Eigen[0], eigenvalues_Eigen[1]), eigenvalues_Eigen[2]));
+
     //Note that this returns the eigenvalues in ascending order, as opposed to descending order described by Jiao et al.
     
     //compute the metric tensor M_Q, with Q = Identity
-    Mat22d M( eigenvalues[1] / eigenvalues[2], 0, 0, eigenvalues[0] / eigenvalues[2]);
+    //Mat22d M( eigenvalues[1] / eigenvalues[2], 0, 0, eigenvalues[0] / eigenvalues[2]);
+    Mat22d M(eig_mid / eig_max, 0, 0, eig_min / eig_max);
     
     //clamp the eigenvalues for safety
     M(0,0) = clamp(M(0,0), 0.005, 0.07);

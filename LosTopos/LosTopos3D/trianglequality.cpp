@@ -14,7 +14,8 @@
 #include <set>
 
 #include "lapack_wrapper.h"
-
+#include <Eigen/Core>
+#include <Eigen/Eigenvalues>
 // ---------------------------------------------------------
 ///
 /// Determine the "mixed" voronoi and barycentric area of the vertex within the given triangle.
@@ -347,11 +348,14 @@ double estimated_max_curvature(const SurfTrack& surf, size_t vertex) {
     Mat22d shapeOperator = 1/areaElt * inverse(J.transpose()*J) * H;
 
     //now do an eigensolve on the shape operator to find the principal curvatures/directions
-    int n = 2, lwork = 10;
-    double eigenvalues[2];
-    double work[10];
-    LAPACK::get_eigen_decomposition( &n, shapeOperator.a, &n, eigenvalues, work, &lwork, &info ); 
-    double max_curvature = max(std::fabs(eigenvalues[0]), std::fabs(eigenvalues[1]));
+    Eigen::Matrix2d shape_Eigen;
+    shape_Eigen << shapeOperator(0, 0), shapeOperator(0, 1), shapeOperator(1, 0), shapeOperator(1, 1);
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix2d> es;
+    es.compute(shape_Eigen, false);
+    if (es.info() != Eigen::Success) assert(0);
+    auto eigenvalues_Eigen = es.eigenvalues();
+    
+    double max_curvature = max(std::fabs(eigenvalues_Eigen[0]), std::fabs(eigenvalues_Eigen[1]));
     
     return max_curvature;
     

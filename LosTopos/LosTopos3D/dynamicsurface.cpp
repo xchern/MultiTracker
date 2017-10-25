@@ -23,7 +23,6 @@
 #include <ctime>
 #include <impactzonesolver.h>
 #include <iomesh.h>
-//#include <lapack_wrapper.h>
 #include <mat.h>
 #include <queue>
 #include <runstats.h>
@@ -503,30 +502,7 @@ unsigned int DynamicSurface::compute_rank_from_triangles(const std::vector<size_
    auto eigenvalues_Eigen = es.eigenvalues();
    double max_eig = std::max(eigenvalues_Eigen[0], std::max(eigenvalues_Eigen[1], eigenvalues_Eigen[2]));
 
-   //// get eigen decomposition
-   //double eigenvalues[3];
-   //double work[9];
-   //int info = ~0, n = 3, lwork = 9;
-   //LAPACK::get_eigen_decomposition( &n, A.a, &n, eigenvalues, work, &lwork, &info );
-
-   //if ( info != 0 )
-   //{
-   //   if ( m_verbose )
-   //   {
-   //      std::cout << "Eigen decomposition failed.  Incident triangles: " << std::endl;
-   //      for ( size_t i = 0; i < triangles.size(); ++i )
-   //      {
-   //         size_t triangle_index = triangles[i];
-   //         Vec3d normal = get_triangle_normal(triangle_index);
-   //         double w = get_triangle_area(triangle_index);
-
-   //         std::cout << "normal: ( " << normal << " )    ";  
-   //         std::cout << "area: " << w << std::endl;
-   //      }
-   //   }
-   //   return 4;
-   //}
-
+   
    // compute rank of primary space
    unsigned int rank = 0;
    for ( unsigned int i = 0; i < 3; ++i )
