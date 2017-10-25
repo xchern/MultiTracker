@@ -10,8 +10,10 @@
 
 #include <meshsmoother.h>
 
+#include <Eigen/Core>
+#include <Eigen/Eigenvalues>
 #include <impactzonesolver.h>
-#include <lapack_wrapper.h>
+
 #include <mat.h>
 #include <nondestructivetrimesh.h>
 #include <surftrack.h>
@@ -344,53 +346,38 @@ Vec3d MeshSmoother::get_smoothing_displacement( size_t v,
         W.push_back( triangle_areas[triangle_index] );
     }
     
-    Mat33d A(0,0,0,0,0,0,0,0,0);
+    Eigen::Matrix3d A_Eigen;
+    A_Eigen.setZero();
     
     // Ax = b from N^TWni = N^TWd
     for ( size_t i = 0; i < N.size(); ++i )
     {
-        A(0,0) += N[i][0] * W[i] * N[i][0];
-        A(1,0) += N[i][1] * W[i] * N[i][0];
-        A(2,0) += N[i][2] * W[i] * N[i][0];
-        
-        A(0,1) += N[i][0] * W[i] * N[i][1];
-        A(1,1) += N[i][1] * W[i] * N[i][1];
-        A(2,1) += N[i][2] * W[i] * N[i][1];
-        
-        A(0,2) += N[i][0] * W[i] * N[i][2];
-        A(1,2) += N[i][1] * W[i] * N[i][2];
-        A(2,2) += N[i][2] * W[i] * N[i][2];
+        A_Eigen(0, 0) += N[i][0] * W[i] * N[i][0];
+        A_Eigen(1, 0) += N[i][1] * W[i] * N[i][0];
+        A_Eigen(2, 0) += N[i][2] * W[i] * N[i][0];
+
+        A_Eigen(0, 1) += N[i][0] * W[i] * N[i][1];
+        A_Eigen(1, 1) += N[i][1] * W[i] * N[i][1];
+        A_Eigen(2, 1) += N[i][2] * W[i] * N[i][1];
+
+        A_Eigen(0, 2) += N[i][0] * W[i] * N[i][2];
+        A_Eigen(1, 2) += N[i][1] * W[i] * N[i][2];
+        A_Eigen(2, 2) += N[i][2] * W[i] * N[i][2];
     }
-    
+
     // get eigen decomposition
-    double eigenvalues[3];
-    double work[9];
-    int info = ~0, n = 3, lwork = 9;
-    LAPACK::get_eigen_decomposition( &n, A.a, &n, eigenvalues, work, &lwork, &info );
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> es;
+    es.compute(A_Eigen, Eigen::ComputeEigenvectors);
+    auto eigenvalues_Eigen = es.eigenvalues();
+    double max_eig = std::max(eigenvalues_Eigen[0], std::max(eigenvalues_Eigen[1], eigenvalues_Eigen[2]));
+    auto eigenvectors_Eigen = es.eigenvectors();
     
-    if ( info != 0 )
+    std::vector<Vec3d> T2;
+    for (unsigned int i = 0; i < 3; ++i)
     {
-        std::cout << "Eigen decomposition failed" << std::endl;
-        std::cout << "number of incident_triangles: " << triangles.size() << std::endl;
-        for ( size_t i = 0; i < triangles.size(); ++i )
-        {
-            size_t triangle_index = triangles[i];
-            std::cout << "triangle: " << m_surf.m_mesh.get_triangle(triangle_index) << std::endl;
-            std::cout << "normal: " << triangle_normals[triangle_index] << std::endl;
-            std::cout << "area: " << triangle_areas[triangle_index] << std::endl;
-        }
-        
-        assert(0);
-    }
-    
-    // compute basis for null space
-    std::vector<Vec3d> T;
-    for ( unsigned int i = 0; i < 3; ++i )
-    {
-        if ( eigenvalues[i] < G_EIGENVALUE_RANK_RATIO * eigenvalues[2] )
-        {
-            T.push_back( Vec3d( A(0,i), A(1,i), A(2,i) ) );
-        }
+       if (eigenvalues_Eigen[i] < G_EIGENVALUE_RANK_RATIO * max_eig) {
+          T2.push_back(Vec3d(eigenvectors_Eigen.col(i)[0], eigenvectors_Eigen.col(i)[1], eigenvectors_Eigen.col(i)[2]));
+       }
     }
     
     
@@ -399,9 +386,9 @@ Vec3d MeshSmoother::get_smoothing_displacement( size_t v,
     {
         for ( unsigned int col = 0; col < 3; ++col )
         {
-            for ( size_t i = 0; i < T.size(); ++i )
+            for ( size_t i = 0; i < T2.size(); ++i )
             {
-                null_space_projection(row, col) += T[i][row] * T[i][col];
+                null_space_projection(row, col) += T2[i][row] * T2[i][col];
             }
         }
     }
@@ -451,7 +438,8 @@ Vec3d MeshSmoother::get_smoothing_displacement_dihedral( size_t v,
     }
     
     Mat33d A(0,0,0,0,0,0,0,0,0);
-    
+    Eigen::Matrix3d A_Eigen;
+    A_Eigen.setZero();
     // Ax = b from N^TWni = N^TWd
     for ( size_t i = 0; i < N.size(); ++i )
     {
@@ -466,31 +454,47 @@ Vec3d MeshSmoother::get_smoothing_displacement_dihedral( size_t v,
         A(0,2) += N[i][0] * W[i] * N[i][2];
         A(1,2) += N[i][1] * W[i] * N[i][2];
         A(2,2) += N[i][2] * W[i] * N[i][2];
+
+        A_Eigen(0, 0) += N[i][0] * W[i] * N[i][0];
+        A_Eigen(1, 0) += N[i][1] * W[i] * N[i][0];
+        A_Eigen(2, 0) += N[i][2] * W[i] * N[i][0];
+
+        A_Eigen(0, 1) += N[i][0] * W[i] * N[i][1];
+        A_Eigen(1, 1) += N[i][1] * W[i] * N[i][1];
+        A_Eigen(2, 1) += N[i][2] * W[i] * N[i][1];
+
+        A_Eigen(0, 2) += N[i][0] * W[i] * N[i][2];
+        A_Eigen(1, 2) += N[i][1] * W[i] * N[i][2];
+        A_Eigen(2, 2) += N[i][2] * W[i] * N[i][2];
         
     }
     
-    // get eigen decomposition
-    double eigenvalues[3];
-    double work[9];
-    int info = ~0, n = 3, lwork = 9;
-    LAPACK::get_eigen_decomposition( &n, A.a, &n, eigenvalues, work, &lwork, &info );
-    
-    if ( info != 0 )
-    {
-        std::cout << "Eigen decomposition failed" << std::endl;
-        std::cout << "number of incident_triangles: " << triangles.size() << std::endl;
-        for ( size_t i = 0; i < triangles.size(); ++i )
-        {
-            size_t triangle_index = triangles[i];
-            std::cout << "triangle: " << m_surf.m_mesh.get_triangle(triangle_index) << std::endl;
-            std::cout << "normal: " << triangle_normals[triangle_index] << std::endl;
-            std::cout << "area: " << triangle_areas[triangle_index] << std::endl;
-        }
-        
-        assert(0);
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> es;
+    es.compute(A_Eigen, Eigen::ComputeEigenvectors);
+    if (es.info() != Eigen::Success) {
+       std::cout << "Eigen decomposition failed" << std::endl;
+       std::cout << "number of incident_triangles: " << triangles.size() << std::endl;
+       for (size_t i = 0; i < triangles.size(); ++i)
+       {
+          size_t triangle_index = triangles[i];
+          std::cout << "triangle: " << m_surf.m_mesh.get_triangle(triangle_index) << std::endl;
+          std::cout << "normal: " << triangle_normals[triangle_index] << std::endl;
+          std::cout << "area: " << triangle_areas[triangle_index] << std::endl;
+       }
+
+       assert(0);
     }
+
+    auto eigenvalues_Eigen = es.eigenvalues();
+    double eig_max = std::max(eigenvalues_Eigen[0], std::max(eigenvalues_Eigen[1], eigenvalues_Eigen[2]));
+    double eig_min = std::min(eigenvalues_Eigen[0], std::min(eigenvalues_Eigen[1], eigenvalues_Eigen[2]));
+    double eig_mid = std::max(min(eigenvalues_Eigen[0], eigenvalues_Eigen[1]), min(max(eigenvalues_Eigen[0], eigenvalues_Eigen[1]), eigenvalues_Eigen[2]));
     
+    auto eigenvectors_Eigen = es.eigenvectors();
+    auto eig_min_vec = eig_min == eigenvalues_Eigen[0] ? eigenvectors_Eigen.col(0) : (eig_min == eigenvalues_Eigen[1] ? eigenvectors_Eigen.col(1) : eigenvectors_Eigen.col(2));
+
     if(feature_edge_count == 0) {
+       
         //do ordinary tangential smoothing (Laplacian smoothing, project out vertical (normal) component
         
         //Determine the normal per Jiao's approach
@@ -508,14 +512,16 @@ Vec3d MeshSmoother::get_smoothing_displacement_dihedral( size_t v,
             Jiao_b += N[i]*W[i];
         }
         
-        Vec3d Jiao_d(0,0,0);
-        for ( unsigned int i = 0; i < 3; ++i )
+       
+        Vec3d Jiao_d(0, 0, 0);
+        for (unsigned int i = 0; i < 3; ++i)
         {
-            if ( eigenvalues[i] > G_EIGENVALUE_RANK_RATIO * eigenvalues[2] )
-            {
-                Vec3d eigenvector( A(0,i), A(1,i), A(2,i) );
-                Jiao_d += dot(Jiao_b,eigenvector)*eigenvector / eigenvalues[i];
-            }
+           if (eigenvalues_Eigen[i] > G_EIGENVALUE_RANK_RATIO * eig_max)
+           {
+              auto eigenvector_Eigen = eigenvectors_Eigen.col(i);
+              Vec3d eigenvector(eigenvector_Eigen[0], eigenvector_Eigen[1], eigenvector_Eigen[2]);
+              Jiao_d += dot(Jiao_b, eigenvector)*eigenvector / eigenvalues_Eigen[i];
+           }
         }
         
         Vec3d normal = Jiao_d;
@@ -541,9 +547,10 @@ Vec3d MeshSmoother::get_smoothing_displacement_dihedral( size_t v,
         return t;
     }
     else  { //feature edge/ridge -> smooth along the ridge
-        
+       std::cout << "Edge count nonzero\n";
         // compute basis for null space
         std::vector<Vec3d> T;
+        
         
         //use only the eigenvector associated with the smallest eigenvalue, since we're assuming we are on a ridge, so there is one degree of freedom
         
@@ -551,8 +558,8 @@ Vec3d MeshSmoother::get_smoothing_displacement_dihedral( size_t v,
         //"Identification of C1 and C2 Discontinuities for Surface Meshes in CAD"
         //Eigenvalues are sorted in ascending order. (Jiao numbers them in the opposite order from us.)
         const double epsilon_thresh = sqr(tan(5*M_PI/180));
-        if(eigenvalues[0] / eigenvalues[1] <= 0.7 && eigenvalues[1] / eigenvalues[2] >= 0.00765) {
-            T.push_back( Vec3d( A(0,0), A(1,0), A(2,0) ) );
+        if (eig_min / eig_mid <= 0.7 && eig_mid / eig_max >= 0.00765) {
+           T.push_back(Vec3d(eig_min_vec[0], eig_min_vec[1], eig_min_vec[2]));
         }
         else {
             //Try to concoct a reasonable alternative ridge/edge vector, when the quadric-based vector is ill-conditioned (e.g. surface seems flat, or actually sharply folded)
