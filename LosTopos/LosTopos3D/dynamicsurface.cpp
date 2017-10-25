@@ -13,7 +13,8 @@
 // ---------------------------------------------------------
 
 #include <dynamicsurface.h>
-
+#include <Eigen/Core>
+#include <Eigen/Eigenvalues>
 #include <broadphasegrid.h>
 #include <cassert>
 #include <ccd_wrapper.h>
@@ -22,7 +23,7 @@
 #include <ctime>
 #include <impactzonesolver.h>
 #include <iomesh.h>
-#include <lapack_wrapper.h>
+//#include <lapack_wrapper.h>
 #include <mat.h>
 #include <queue>
 #include <runstats.h>
@@ -458,7 +459,9 @@ unsigned int DynamicSurface::vertex_primary_space_rank( size_t v, int region ) c
 }
 
 unsigned int DynamicSurface::compute_rank_from_triangles(const std::vector<size_t>& triangles) const {
-   Mat33d A(0,0,0,0,0,0,0,0,0);
+   
+   Eigen::Matrix3d A_Eigen;
+   A_Eigen.setZero();
 
    for ( size_t i = 0; i < triangles.size(); ++i )
    {
@@ -466,48 +469,69 @@ unsigned int DynamicSurface::compute_rank_from_triangles(const std::vector<size_
       Vec3d normal = get_triangle_normal(triangle_index);
       double w = get_triangle_area(triangle_index);
 
-      A(0,0) += normal[0] * w * normal[0];
-      A(1,0) += normal[1] * w * normal[0];
-      A(2,0) += normal[2] * w * normal[0];
+      A_Eigen(0, 0) += normal[0] * w * normal[0];
+      A_Eigen(1, 0) += normal[1] * w * normal[0];
+      A_Eigen(2, 0) += normal[2] * w * normal[0];
 
-      A(0,1) += normal[0] * w * normal[1];
-      A(1,1) += normal[1] * w * normal[1];
-      A(2,1) += normal[2] * w * normal[1];
+      A_Eigen(0, 1) += normal[0] * w * normal[1];
+      A_Eigen(1, 1) += normal[1] * w * normal[1];
+      A_Eigen(2, 1) += normal[2] * w * normal[1];
 
-      A(0,2) += normal[0] * w * normal[2];
-      A(1,2) += normal[1] * w * normal[2];
-      A(2,2) += normal[2] * w * normal[2];
+      A_Eigen(0, 2) += normal[0] * w * normal[2];
+      A_Eigen(1, 2) += normal[1] * w * normal[2];
+      A_Eigen(2, 2) += normal[2] * w * normal[2];
    }
-
-   // get eigen decomposition
-   double eigenvalues[3];
-   double work[9];
-   int info = ~0, n = 3, lwork = 9;
-   LAPACK::get_eigen_decomposition( &n, A.a, &n, eigenvalues, work, &lwork, &info );
-
-   if ( info != 0 )
-   {
-      if ( m_verbose )
+     
+   Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> es;
+   es.compute(A_Eigen, false);
+   if (es.info() != Eigen::Success) {
+      if (m_verbose)
       {
          std::cout << "Eigen decomposition failed.  Incident triangles: " << std::endl;
-         for ( size_t i = 0; i < triangles.size(); ++i )
+         for (size_t i = 0; i < triangles.size(); ++i)
          {
             size_t triangle_index = triangles[i];
             Vec3d normal = get_triangle_normal(triangle_index);
             double w = get_triangle_area(triangle_index);
 
-            std::cout << "normal: ( " << normal << " )    ";  
+            std::cout << "normal: ( " << normal << " )    ";
             std::cout << "area: " << w << std::endl;
          }
       }
       return 4;
    }
+   auto eigenvalues_Eigen = es.eigenvalues();
+   double max_eig = std::max(eigenvalues_Eigen[0], std::max(eigenvalues_Eigen[1], eigenvalues_Eigen[2]));
+
+   //// get eigen decomposition
+   //double eigenvalues[3];
+   //double work[9];
+   //int info = ~0, n = 3, lwork = 9;
+   //LAPACK::get_eigen_decomposition( &n, A.a, &n, eigenvalues, work, &lwork, &info );
+
+   //if ( info != 0 )
+   //{
+   //   if ( m_verbose )
+   //   {
+   //      std::cout << "Eigen decomposition failed.  Incident triangles: " << std::endl;
+   //      for ( size_t i = 0; i < triangles.size(); ++i )
+   //      {
+   //         size_t triangle_index = triangles[i];
+   //         Vec3d normal = get_triangle_normal(triangle_index);
+   //         double w = get_triangle_area(triangle_index);
+
+   //         std::cout << "normal: ( " << normal << " )    ";  
+   //         std::cout << "area: " << w << std::endl;
+   //      }
+   //   }
+   //   return 4;
+   //}
 
    // compute rank of primary space
    unsigned int rank = 0;
    for ( unsigned int i = 0; i < 3; ++i )
    {
-      if ( eigenvalues[i] > G_EIGENVALUE_RANK_RATIO * eigenvalues[2] )
+      if ( eigenvalues_Eigen[i] > G_EIGENVALUE_RANK_RATIO * max_eig )
       {
          ++rank;
       }
