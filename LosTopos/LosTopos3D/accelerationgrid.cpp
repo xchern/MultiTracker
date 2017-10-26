@@ -149,10 +149,10 @@ void AccelerationGrid::set( const Vec3st& dims, const Vec3d& xmin, const Vec3d& 
     
     clear();
     m_cells.resize((int)dims[0], (int)dims[1], (int)dims[2]);    
-    for(size_t i = 0; i < m_cells.a.size(); i++)
-    {
-        m_cells.a[i] = 0;
-    }   
+    
+    //zero out the cells
+    std::fill(m_cells.a.begin(), m_cells.a.end(), (std::vector<size_t>*)0);
+    
 }
 
 // --------------------------------------------------------

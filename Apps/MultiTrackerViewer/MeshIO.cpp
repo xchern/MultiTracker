@@ -93,7 +93,7 @@ bool MeshIO::load(LosTopos::SurfTrack & st, const std::string & filename, bool b
         std::ifstream is(filename.c_str(), std::ios::binary);
 
         size_t n;
-        n = st.m_mesh.nv();
+        //n = st.m_mesh.nv();
         is.read((char *)&n, sizeof (size_t));
         
         st.m_mesh.set_num_vertices(n);
@@ -111,37 +111,41 @@ bool MeshIO::load(LosTopos::SurfTrack & st, const std::string & filename, bool b
         for (size_t i = 0; i < n; i++)
             st.m_masses[i] = LosTopos::Vec3d(1, 1, 1);
         
-        st.set_all_positions(pos);
-        st.set_all_newpositions(pos);
-        st.set_all_remesh_velocities(std::vector<LosTopos::Vec3d>(n, LosTopos::Vec3d(0)));
-        
-        n = st.m_mesh.nt();
+      
+        //n = st.m_mesh.nt();
         is.read((char *)&n, sizeof (size_t));
         
-        std::vector<LosTopos::Vec3st> tris;
-        std::vector<LosTopos::Vec2i> labels;
+        std::vector<LosTopos::Vec3st> tris(n);
+        std::vector<LosTopos::Vec2i> labels(n);
         for (size_t i = 0; i < n; i++)
         {
             LosTopos::Vec3st t;
             is.read((char *)&(t[0]), sizeof (t[0]));
             is.read((char *)&(t[1]), sizeof (t[1]));
             is.read((char *)&(t[2]), sizeof (t[2]));
-            tris.push_back(t);
-            
+            tris[i] = t;
+
             LosTopos::Vec2i l;
             is.read((char *)&(l[0]), sizeof (l[0]));
             is.read((char *)&(l[1]), sizeof (l[1]));
-            labels.push_back(l);
+            labels[i] = l;
         }
         
+        //(We load the triangles first so that when we compute the edge lengths
+        //to determine the length scale for the acceleration grid, it's not a div by zero.
+        //I realize this is non-obvious and non-ideal; I apologize!)
         st.m_mesh.replace_all_triangles(tris, labels);
         
+        st.set_all_positions(pos);
+        st.set_all_newpositions(pos);
+        st.set_all_remesh_velocities(std::vector<LosTopos::Vec3d>(n, LosTopos::Vec3d(0)));
+
+        //why do these need resizing at all?
         size_t nv = st.m_mesh.m_vertex_to_triangle_map.size();
         st.pm_positions.resize(nv);
         st.pm_newpositions.resize(nv);
         st.pm_velocities.resize(nv);
         st.m_velocities.resize(nv);
-        
         is.close();
         
         return is.good();

@@ -212,7 +212,10 @@ bool Sim::init(const std::string & option_file, const std::string & output_direc
     params.m_use_curvature_when_splitting = false;
 
     masses.resize(vertices.size(), Vec3d(1, 1, 1));
+    
+    // Create the main surf track
     m_st = new SurfTrack(vertices, faces, face_labels, masses, params);
+
     if (m_bbwall) m_st->m_solid_vertices_callback = this;
     
     
