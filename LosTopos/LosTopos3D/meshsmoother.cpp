@@ -547,7 +547,7 @@ Vec3d MeshSmoother::get_smoothing_displacement_dihedral( size_t v,
         return t;
     }
     else  { //feature edge/ridge -> smooth along the ridge
-       std::cout << "Edge count nonzero\n";
+       
         // compute basis for null space
         std::vector<Vec3d> T;
         
