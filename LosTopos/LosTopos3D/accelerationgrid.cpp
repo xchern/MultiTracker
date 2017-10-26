@@ -16,7 +16,6 @@
 
 #include <array3.h>
 #include <limits>
-#include <util.h>
 #include <vec.h>
 #include <vector>
 #include <wallclocktime.h>

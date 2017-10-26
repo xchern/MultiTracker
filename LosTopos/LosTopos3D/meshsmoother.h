@@ -18,8 +18,7 @@
 
 #include <cstddef>
 #include <vector>
-#include "util.h"
-
+#include <cmath>
 // ---------------------------------------------------------
 //  Forwards and typedefs
 // ---------------------------------------------------------
