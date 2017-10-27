@@ -697,6 +697,7 @@ bool EdgeFlipper::flip_pass( )
             else if ( m_mesh.m_edge_to_triangle_map[i].size() == 4 )
             {
                 // non manifold edge: disable flipping
+               //TODO is this good or bad?
                 continue;
                 
                 triangle_a = m_mesh.m_edge_to_triangle_map[i][0];
@@ -767,14 +768,17 @@ bool EdgeFlipper::flip_pass( )
                 double angle1 = acos( dot(off2, off3) / (m2*m3) );
                 
                 if(m_surf.m_aggressive_mode) {
-                    //skip any triangles that don't have fairly bad angles.
-                    double min_angle = min_triangle_angle(pos_vert_0, pos_vert_1, pos_3rd_0);
-                    min_angle = min(min_angle, min_triangle_angle(pos_vert_0, pos_vert_1, pos_3rd_1));
+                    Vec2d angles0, angles1;
+                    min_and_max_triangle_angle(pos_vert_0, pos_vert_1, pos_3rd_0, angles0);
+                    min_and_max_triangle_angle(pos_vert_0, pos_vert_1, pos_3rd_1, angles1);
+                    double min_angle, max_angle;
+                    min_angle = min(angles0[0], angles1[0]);
+                    max_angle = max(angles0[1], angles1[1]);
+                    
+                    //skip processing any triangles that don't have fairly bad angles.
                     if(min_angle > m_surf.m_min_triangle_angle)
                         continue;
                     
-                    double max_angle = max_triangle_angle(pos_vert_0, pos_vert_1, pos_3rd_0);
-                    max_angle = min(max_angle, max_triangle_angle(pos_vert_0, pos_vert_1, pos_3rd_1));
                     if(max_angle < m_surf.m_max_triangle_angle)
                         continue;
                 }
@@ -842,6 +846,9 @@ bool EdgeFlipper::flip_pass( )
 int EdgeFlipper::edge_count_bordering_region_pair(size_t vertex, Vec2i region_pair) {
     int count = 0;
     
+    //TODO Can this be sped up by "walking the loop" from the central tri
+    //around the vertex 'til we get back again? Or is this current approach faster?
+
     Vec2i flipped_pair(region_pair[1], region_pair[0]);
     
     //consider all incident edges
@@ -851,10 +858,10 @@ int EdgeFlipper::edge_count_bordering_region_pair(size_t vertex, Vec2i region_pa
         //consider all triangles on the edge
         for(size_t j = 0; j < m_surf.m_mesh.m_edge_to_triangle_map[edge].size(); ++j) {
             size_t tri = m_surf.m_mesh.m_edge_to_triangle_map[edge][j];
-            Vec2i labels = m_surf.m_mesh.get_triangle_label(tri);
+            const Vec2i& labels = m_surf.m_mesh.m_triangle_labels[tri];
             //if one of the triangles matches the requested manifold region (label pair), we're done.
             if(labels == region_pair || labels == flipped_pair) {
-                ++count;
+                count++;
                 break;
             }
         }

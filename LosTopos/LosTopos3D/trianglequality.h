@@ -240,6 +240,20 @@ inline double max_triangle_angle( const Vec3d& a, const Vec3d& b, const Vec3d& c
     return max( angle_a, angle_b, angle_c );   
 }
 
+// ---------------------------------------------------------
+///
+/// Compute the maximum "triangle angle", defined as an interior angle at a vertex.
+///
+// ---------------------------------------------------------
+
+inline void min_and_max_triangle_angle(const Vec3d& a, const Vec3d& b, const Vec3d& c, Vec2d& minmax)
+{
+   double angle_a, angle_b, angle_c;
+   triangle_angles(a, b, c, angle_a, angle_b, angle_c);
+   minmax[0] = min(angle_a, angle_b, angle_c);
+   minmax[1] = max(angle_a, angle_b, angle_c);
+}
+
 
 // ---------------------------------------------------------
 ///

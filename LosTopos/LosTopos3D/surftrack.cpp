@@ -602,9 +602,13 @@ bool SurfTrack::triangle_with_bad_angle(size_t i)
     Vec3d v1 = get_position(tri[1]);
     Vec3d v2 = get_position(tri[2]);
     
-    double min_angle = min_triangle_angle(v0,v1,v2);
-    double max_angle = max_triangle_angle(v0,v1,v2);
-    
+    //double min_angle = min_triangle_angle(v0,v1,v2);
+    //double max_angle = max_triangle_angle(v0,v1,v2);
+    Vec2d minmax;
+    min_and_max_triangle_angle(v0, v1, v2, minmax);
+    double min_angle = minmax[0];
+    double max_angle = minmax[1];
+
     //these simply must be true at all times
     assert(min_angle >= 0);
     assert(max_angle < 1.000001*M_PI);
