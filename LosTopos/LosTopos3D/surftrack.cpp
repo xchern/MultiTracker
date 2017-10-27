@@ -55,18 +55,18 @@ extern RunStats g_stats;
 // ---------------------------------------------------------
 
 SurfTrackInitializationParameters::SurfTrackInitializationParameters() :
-m_proximity_epsilon( 1e-4 ),
-m_friction_coefficient( 0.0 ),
-m_min_triangle_area( 1e-7 ),
-m_t1_transition_enabled( false ),
+m_proximity_epsilon(1e-4),
+m_friction_coefficient(0.0),
+m_min_triangle_area(1e-7),
+m_t1_transition_enabled(false),
 m_velocity_field_callback(NULL),
-m_improve_collision_epsilon( 2e-6 ),
-m_use_fraction( false ),
-m_min_edge_length( UNINITIALIZED_DOUBLE ),     // <- Don't allow instantiation without setting these parameters
-m_max_edge_length( UNINITIALIZED_DOUBLE ),     // <-
-m_max_volume_change( UNINITIALIZED_DOUBLE ),   // <-
-m_min_triangle_angle( 2.0 ),
-m_max_triangle_angle( 178.0 ),
+m_improve_collision_epsilon(2e-6),
+m_use_fraction(false),
+m_min_edge_length(UNINITIALIZED_DOUBLE),     // <- Don't allow instantiation without setting these parameters
+m_max_edge_length(UNINITIALIZED_DOUBLE),     // <-
+m_max_volume_change(UNINITIALIZED_DOUBLE),   // <-
+m_min_triangle_angle(2.0),
+m_max_triangle_angle(178.0),
 m_large_triangle_angle_to_split(135.0),
 m_use_curvature_when_splitting( false ),
 m_use_curvature_when_collapsing( false ),
@@ -129,6 +129,8 @@ m_merge_proximity_epsilon( initial_parameters.m_merge_proximity_epsilon ),
 m_min_triangle_area( initial_parameters.m_min_triangle_area ),
 m_min_triangle_angle( initial_parameters.m_min_triangle_angle ),
 m_max_triangle_angle( initial_parameters.m_max_triangle_angle ),
+m_min_angle_cosine(cos(M_PI * initial_parameters.m_max_triangle_angle / 180.0)), //note, min angle implies max cos
+m_max_angle_cosine(cos(M_PI * initial_parameters.m_min_triangle_angle / 180.0)), //and max angle gives the min cos
 m_large_triangle_angle_to_split( initial_parameters.m_large_triangle_angle_to_split ),
 m_subdivision_scheme( initial_parameters.m_subdivision_scheme ),
 should_delete_subdivision_scheme_object( m_subdivision_scheme == NULL ? true : false ),
@@ -602,23 +604,21 @@ bool SurfTrack::triangle_with_bad_angle(size_t i)
     Vec3d v1 = get_position(tri[1]);
     Vec3d v2 = get_position(tri[2]);
     
-    //double min_angle = min_triangle_angle(v0,v1,v2);
-    //double max_angle = max_triangle_angle(v0,v1,v2);
-    Vec2d minmax;
-    min_and_max_triangle_angle(v0, v1, v2, minmax);
-    double min_angle = minmax[0];
-    double max_angle = minmax[1];
+    //do these computations in cos to avoid costly arccos
+    Vec2d minmaxcos;
+    min_and_max_triangle_angle_cosines(v0, v1, v2, minmaxcos);
+    double min_cos = minmaxcos[0];
+    double max_cos = minmaxcos[1];
+    assert(min_cos == min_cos);
+    assert(max_cos == max_cos);
+    assert(max_cos < 1.000001);
+    assert(min_cos > -1.000001);
 
-    //these simply must be true at all times
-    assert(min_angle >= 0);
-    assert(max_angle < 1.000001*M_PI);
-    assert(min_angle == min_angle);
-    assert(max_angle == max_angle);
+    bool any_bad_cos = min_cos < m_min_angle_cosine || max_cos >= m_max_angle_cosine;
     
-    //if any triangles are outside our bounds, we have to keep going.
-    
-    if (rad2deg(min_angle) < m_min_triangle_angle || rad2deg(max_angle) >= m_max_triangle_angle)
-        return true;
+    if (any_bad_cos)
+       return true;
+
     return false;
 }
 

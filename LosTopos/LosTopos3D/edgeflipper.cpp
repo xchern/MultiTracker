@@ -768,19 +768,20 @@ bool EdgeFlipper::flip_pass( )
                 double angle1 = acos( dot(off2, off3) / (m2*m3) );
                 
                 if(m_surf.m_aggressive_mode) {
-                    Vec2d angles0, angles1;
-                    min_and_max_triangle_angle(pos_vert_0, pos_vert_1, pos_3rd_0, angles0);
-                    min_and_max_triangle_angle(pos_vert_0, pos_vert_1, pos_3rd_1, angles1);
-                    double min_angle, max_angle;
-                    min_angle = min(angles0[0], angles1[0]);
-                    max_angle = max(angles0[1], angles1[1]);
                     
+                    Vec2d angles_cos0, angles_cos1;
+                    min_and_max_triangle_angle_cosines(pos_vert_0, pos_vert_1, pos_3rd_0, angles_cos0);
+                    min_and_max_triangle_angle_cosines(pos_vert_0, pos_vert_1, pos_3rd_1, angles_cos1);
+                    double min_cos, max_cos;
+                    min_cos = min(angles_cos0[0], angles_cos1[0]);
+                    max_cos = max(angles_cos0[1], angles_cos1[1]);
+
                     //skip processing any triangles that don't have fairly bad angles.
-                    if(min_angle > m_surf.m_min_triangle_angle)
+                    bool angles_are_fine_cos = min_cos > m_surf.m_min_angle_cosine || max_cos < m_surf.m_max_angle_cosine;
+
+                    if (angles_are_fine_cos)
                         continue;
                     
-                    if(max_angle < m_surf.m_max_triangle_angle)
-                        continue;
                 }
                 
                 //if the sum of the opposing angles exceeds 180, then we should flip (according to the Delaunay criterion)
