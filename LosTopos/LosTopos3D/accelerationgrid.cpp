@@ -155,6 +155,8 @@ void AccelerationGrid::set( const Vec3st& dims, const Vec3d& xmin, const Vec3d& 
     
 }
 
+
+
 // --------------------------------------------------------
 ///
 /// Generate a set of voxel indices from a pair of AABB extents
@@ -164,14 +166,17 @@ void AccelerationGrid::set( const Vec3st& dims, const Vec3d& xmin, const Vec3d& 
 void AccelerationGrid::boundstoindices(const Vec3d& xmin, const Vec3d& xmax, Vec3i& xmini, Vec3i& xmaxi)
 {
     
-    xmini[0] = (int) std::floor((xmin[0] - m_gridxmin[0]) * m_invcellsize[0]);
-    xmini[1] = (int) std::floor((xmin[1] - m_gridxmin[1]) * m_invcellsize[1]);
-    xmini[2] = (int) std::floor((xmin[2] - m_gridxmin[2]) * m_invcellsize[2]);
-    
-    xmaxi[0] = (int) std::floor((xmax[0] - m_gridxmin[0]) * m_invcellsize[0]);
-    xmaxi[1] = (int) std::floor((xmax[1] - m_gridxmin[1]) * m_invcellsize[1]);
-    xmaxi[2] = (int) std::floor((xmax[2] - m_gridxmin[2]) * m_invcellsize[2]);
-    
+   //These used to have Floor calls too, but I decided they were superfluous here, since the indices are
+   //always non-negative so no weird cases should arise...
+   //If we used a (hash)grid with negative cell indices allowed, then we'd be in trouble!! Careful!
+   xmini[0] = (int)((xmin[0] - m_gridxmin[0]) * m_invcellsize[0]);
+   xmini[1] = (int)((xmin[1] - m_gridxmin[1]) * m_invcellsize[1]);
+   xmini[2] = (int)((xmin[2] - m_gridxmin[2]) * m_invcellsize[2]);
+
+   xmaxi[0] = (int)((xmax[0] - m_gridxmin[0]) * m_invcellsize[0]);
+   xmaxi[1] = (int)((xmax[1] - m_gridxmin[1]) * m_invcellsize[1]);
+   xmaxi[2] = (int)((xmax[2] - m_gridxmin[2]) * m_invcellsize[2]); 
+   
     if(xmini[0] < 0) xmini[0] = 0;
     if(xmini[1] < 0) xmini[1] = 0;
     if(xmini[2] < 0) xmini[2] = 0;
@@ -179,7 +184,7 @@ void AccelerationGrid::boundstoindices(const Vec3d& xmin, const Vec3d& xmax, Vec
     if(xmaxi[0] < 0) xmaxi[0] = 0;
     if(xmaxi[1] < 0) xmaxi[1] = 0;
     if(xmaxi[2] < 0) xmaxi[2] = 0;
-    
+   
     assert( m_cells.ni < INT_MAX );
     assert( m_cells.nj < INT_MAX );
     assert( m_cells.nk < INT_MAX );
@@ -477,15 +482,6 @@ void AccelerationGrid::clear()
 
 void AccelerationGrid::find_overlapping_elements( const Vec3d& xmin, const Vec3d& xmax, std::vector<size_t>& results ) 
 {
-    if(m_lastquery == std::numeric_limits<unsigned int>::max())
-    {
-        std::vector<unsigned int>::iterator iter = m_elementquery.begin();
-        for( ; iter != m_elementquery.end(); ++iter )
-        {
-            *iter = 0;
-        }
-        m_lastquery = 0;
-    }
     
     ++m_lastquery;
     
@@ -533,6 +529,7 @@ void AccelerationGrid::find_overlapping_elements( const Vec3d& xmin, const Vec3d
         }
     }
 }
+
 
 }
 
