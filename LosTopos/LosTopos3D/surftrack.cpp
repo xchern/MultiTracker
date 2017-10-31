@@ -68,15 +68,16 @@ m_max_volume_change(UNINITIALIZED_DOUBLE),   // <-
 m_min_triangle_angle(2.0),
 m_max_triangle_angle(178.0),
 m_large_triangle_angle_to_split(135.0),
-m_use_curvature_when_splitting( false ),
-m_use_curvature_when_collapsing( false ),
-m_min_curvature_multiplier( 1.0 ),
-m_max_curvature_multiplier( 1.0 ),
-m_allow_vertex_movement_during_collapse( true ),
-m_perform_smoothing( true ),
-m_merge_proximity_epsilon( 1e-5 ),
+m_use_curvature_when_splitting(false),
+m_use_curvature_when_collapsing(false),
+m_min_curvature_multiplier(1.0),
+m_max_curvature_multiplier(1.0),
+m_allow_vertex_movement_during_collapse(true),
+m_perform_smoothing(true),
+m_merge_proximity_epsilon(1e-5),
 m_subdivision_scheme(NULL),
 m_collision_safety(true),
+m_collision_safety_asserts(true),
 m_allow_topology_changes(true),
 m_allow_non_manifold(true),
 m_perform_improvement(true),
@@ -109,6 +110,7 @@ DynamicSurface( vs,
                initial_parameters.m_proximity_epsilon,
                initial_parameters.m_friction_coefficient,
                initial_parameters.m_collision_safety,
+               initial_parameters.m_collision_safety_asserts,
                initial_parameters.m_verbose),
 
 m_collapser( *this, initial_parameters.m_use_curvature_when_collapsing, initial_parameters.m_remesh_boundaries, initial_parameters.m_min_curvature_multiplier ),
@@ -934,7 +936,7 @@ void SurfTrack::improve_mesh( )
         assert_no_bad_labels();
         
         std::cout << "Done improvement\n" << std::endl;
-        if ( m_collision_safety )
+        if ( m_collision_safety && m_collision_safety_asserts )
         {
             assert_mesh_is_intersection_free( false );
         }      
@@ -950,7 +952,7 @@ void SurfTrack::cut_mesh( const std::vector< std::pair<size_t,size_t> >& edges)
     // edge cutting
     m_cutter.separate_edges_new(edges);
     
-    if ( m_collision_safety )
+    if ( m_collision_safety && m_collision_safety_asserts )
     {
         //std::cout << "Checking collisions after cutting.\n";
         assert_mesh_is_intersection_free( false );
@@ -980,7 +982,7 @@ void SurfTrack::topology_changes( )
     if (m_mesheventcallback)
         m_mesheventcallback->log() << "Snap pass finished" << std::endl;
     
-    if ( m_collision_safety )
+    if ( m_collision_safety && m_collision_safety_asserts )
     {
         assert_mesh_is_intersection_free( false );
     }

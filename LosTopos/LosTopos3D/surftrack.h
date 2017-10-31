@@ -142,6 +142,10 @@ struct SurfTrackInitializationParameters
     ///
     bool m_collision_safety;
     
+    /// Whether to employ extra asserts to verify collision-safety
+    ///
+    bool m_collision_safety_asserts;
+
     /// Whether to allow changes in topology
     ///
     bool m_allow_topology_changes;

@@ -195,6 +195,7 @@ bool Sim::init(const std::string & option_file, const std::string & output_direc
     params.m_allow_non_manifold = Options::boolValue("lostopos-allow-non-manifold");
     params.m_allow_topology_changes = Options::boolValue("lostopos-allow-topology-changes");
     params.m_collision_safety = true;
+    params.m_collision_safety_asserts = false; //be cautious here.
     params.m_remesh_boundaries = true;
     params.m_t1_transition_enabled = Options::boolValue("lostopos-t1-transition-enabled");
     params.m_pull_apart_distance = Options::doubleValue("lostopos-t1-pull-apart-distance-fraction") * mean_edge_len;
@@ -659,8 +660,11 @@ LosTopos::Vec3c Sim::generate_collapsed_solid_label(LosTopos::SurfTrack & st, si
     
     int constraint0 = onBBWall(Vec3d(x0[0], x0[1], x0[2]));
     int constraint1 = onBBWall(Vec3d(x1[0], x1[1], x1[2]));
-    
-    assert(((constraint0 & (1 << 0)) || (constraint0 & (1 << 3))) == (bool)label0[0]);
+   /* std::cout << "v0: " << v0 << "x0 : " << x0 << " v1: " << v1 << "x1: " << x1 << std::endl;
+    std::cout << "Label0 " << (int)label0[0] << (int)label0[1] << (int)label0[2] << std::endl;
+    std::cout << "Constraint0 " << constraint0 << std::endl;
+    std::cout << "Constraint1 " << constraint1 << std::endl;*/
+    assert(((constraint0 & (1 << 0)) || (constraint0 & (1 << 3))) == (bool)label0[0]);  //x0's physical status of being on the left or right wall should match label0's (i.e. mass's solid indicator)
     assert(((constraint0 & (1 << 1)) || (constraint0 & (1 << 4))) == (bool)label0[1]);
     assert(((constraint0 & (1 << 2)) || (constraint0 & (1 << 5))) == (bool)label0[2]);
     assert(((constraint1 & (1 << 0)) || (constraint1 & (1 << 3))) == (bool)label1[0]);

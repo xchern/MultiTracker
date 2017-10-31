@@ -168,7 +168,7 @@ void AccelerationGrid::boundstoindices(const Vec3d& xmin, const Vec3d& xmax, Vec
     
    //These used to have Floor calls too, but I decided they were superfluous here, since the indices are
    //always non-negative so no weird cases should arise...
-   //If we used a (hash)grid with negative cell indices allowed, then we'd be in trouble!! Careful!
+   //If we used a spatial grid with negative cell indices allowed, then we'd be in trouble!! Careful!
    xmini[0] = (int)((xmin[0] - m_gridxmin[0]) * m_invcellsize[0]);
    xmini[1] = (int)((xmin[1] - m_gridxmin[1]) * m_invcellsize[1]);
    xmini[2] = (int)((xmin[2] - m_gridxmin[2]) * m_invcellsize[2]);
