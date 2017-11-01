@@ -454,12 +454,15 @@ void AccelerationGrid::clear()
         {
             delete cell;
             cell = 0;
-           //cell->clear(); //don't clear the memory, since we likely want to reuse it.
         }
     }
     
     //clear the entries for each element, but don't clear the overall vector itself, since we
     //don't want to reallocate memory for the individual vectors.
+    
+    //TODO Maybe we intermittently DO want to clear out the whole grid's memory,
+    //since unused but still allocated blocks can begin taking up a ton of space!
+
     //m_elementidxs.clear();
     for(size_t i = 0; i < m_elementidxs.size(); ++i) { 
        m_elementidxs[i].clear();
@@ -499,6 +502,7 @@ void AccelerationGrid::find_overlapping_elements( const Vec3d& xmin, const Vec3d
                 
                 if(cell)
                 {
+
                     for( std::vector<size_t>::const_iterator citer = cell->begin(); citer != cell->end(); ++citer)
                     {
                         size_t oidx = *citer;

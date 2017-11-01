@@ -662,7 +662,12 @@ bool EdgeFlipper::flip_pass( )
     //
     // Each "pass" is once over the entire set of edges (ignoring edges created during the current pass)
     //
-    
+
+    //this is a cache to store incident edge-counts at vertices, to save on looking up the neighborhood
+    //it is indexed per vertex, and it stores the number of edges counts and a corresponding region pair
+    //consistent with a call to "edge_count_bordering_region_pair" (which is a bit costly)
+    std::vector<std::pair<int, Vec2i>> edge_counts_by_region_pair(m_surf.get_num_vertices(), std::make_pair(-1, Vec2i(-1,-1)));
+
     while ( flip_occurred && num_flip_passes++ < MAX_NUM_FLIP_PASSES )
     {
         if ( m_surf.m_verbose )
@@ -804,10 +809,32 @@ bool EdgeFlipper::flip_pass( )
                 
                 int val_a, val_b, val_0, val_1;
                 Vec2i region_pair = m_mesh.get_triangle_label(triangle_a); //doesn't matter which triangle we consider.
+                
+                //do the computation for the edge counts (if necessary), and store the result in our simple cache for speed! 
+                //There's otherwise a fair amount of redundance in smooth single-region patches
+                val_0 = edge_counts_by_region_pair[vert_0].second         == region_pair ? edge_counts_by_region_pair[vert_0].first   : edge_count_bordering_region_pair(vert_0, region_pair);
+                edge_counts_by_region_pair[vert_0].first = val_0; edge_counts_by_region_pair[vert_0].second = region_pair;
+
+                val_1 = edge_counts_by_region_pair[vert_1].second         == region_pair ? edge_counts_by_region_pair[vert_1].first   : edge_count_bordering_region_pair(vert_1, region_pair);
+                edge_counts_by_region_pair[vert_1].first = val_1; edge_counts_by_region_pair[vert_1].second = region_pair;
+
+                val_a = edge_counts_by_region_pair[third_vertex_0].second == region_pair ? edge_counts_by_region_pair[third_vertex_0].first : edge_count_bordering_region_pair(third_vertex_0, region_pair);
+                edge_counts_by_region_pair[third_vertex_0].first = val_a; edge_counts_by_region_pair[third_vertex_0].second = region_pair;
+
+                val_b = edge_counts_by_region_pair[third_vertex_1].second == region_pair ? edge_counts_by_region_pair[third_vertex_1].first : edge_count_bordering_region_pair(third_vertex_1, region_pair);
+                edge_counts_by_region_pair[third_vertex_1].first = val_b; edge_counts_by_region_pair[third_vertex_1].second = region_pair;
+                
+                /*assert(val_0 == edge_count_bordering_region_pair(vert_0, region_pair));
+                assert(val_1 == edge_count_bordering_region_pair(vert_1, region_pair));
+                assert(val_a == edge_count_bordering_region_pair(third_vertex_0, region_pair));
+                assert(val_b == edge_count_bordering_region_pair(third_vertex_1, region_pair));*/
+                
+               /* 
+               //(The below is what the above 8 lines are doing, but accelerated a bit by a cache.)
                 val_0 = edge_count_bordering_region_pair(vert_0, region_pair);
                 val_1 = edge_count_bordering_region_pair(vert_1, region_pair);
                 val_a = edge_count_bordering_region_pair(third_vertex_0, region_pair);
-                val_b = edge_count_bordering_region_pair(third_vertex_1, region_pair);
+                val_b = edge_count_bordering_region_pair(third_vertex_1, region_pair);*/
                 
                 int score_before = sqr(val_a-opt_val_a) + sqr(val_b-opt_val_b)  + sqr(val_0-opt_val_0) + sqr(val_1-opt_val_1);
                 
@@ -828,6 +855,20 @@ bool EdgeFlipper::flip_pass( )
                 flipped = flip_edge( i, triangle_a, triangle_b, third_vertex_0, third_vertex_1 );            
             }
             
+            if (flipped && !m_use_Delaunay_criterion) {
+               //a flip happened, so update our cache
+               Vec2i region_pair = m_mesh.get_triangle_label(triangle_a);
+               int val_0 = edge_count_bordering_region_pair(vert_0, region_pair);
+               int val_1 = edge_count_bordering_region_pair(vert_1, region_pair);
+               int val_a = edge_count_bordering_region_pair(third_vertex_0, region_pair);
+               int val_b = edge_count_bordering_region_pair(third_vertex_1, region_pair);
+
+               edge_counts_by_region_pair[vert_0].first = val_0; edge_counts_by_region_pair[vert_0].second = region_pair;
+               edge_counts_by_region_pair[vert_1].first = val_1; edge_counts_by_region_pair[vert_1].second = region_pair;
+               edge_counts_by_region_pair[third_vertex_0].first = val_a; edge_counts_by_region_pair[third_vertex_0].second = region_pair;
+               edge_counts_by_region_pair[third_vertex_1].first = val_b; edge_counts_by_region_pair[third_vertex_1].second = region_pair;
+            }
+
             flip_occurred |= flipped;            
         }
         
