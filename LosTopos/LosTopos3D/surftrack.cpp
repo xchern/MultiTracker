@@ -404,18 +404,39 @@ void SurfTrack::defrag_mesh( )
     
     double start_time = get_time_in_seconds();
     
+    // do a quick pass through to see if any vertices/tris have been deleted
     
-    // do a quick pass through to see if any vertices have been deleted
-    bool any_deleted = false;
-    for ( size_t i = 0; i < get_num_vertices(); ++i )
+    int vert_delete_count = 0;
+    for (size_t i = 0; i < get_num_vertices(); ++i)
     {
-        if ( m_mesh.vertex_is_deleted(i) )
-        {
-            any_deleted = true;
-            break;
-        }
+       if (m_mesh.triangle_is_deleted(i))
+       {
+          vert_delete_count++;
+       }
     }
     
+    int tri_delete_count = 0;
+    for (size_t i = 0; i < m_mesh.num_triangles(); ++i)
+    {
+       if (m_mesh.triangle_is_deleted(i))
+       {
+          tri_delete_count++;
+       }
+    }
+
+    double defrag_threshold = 0.1; //10% threshold seems reasonable
+    bool enough_deleted = tri_delete_count > defrag_threshold*m_mesh.num_triangles() ||
+                          vert_delete_count > defrag_threshold*get_num_vertices();
+
+    if (!enough_deleted) {
+       std::cout << "Skipping defrag.\n";
+       return;
+    }
+    
+    bool any_deleted = vert_delete_count > 0;
+
+    std::cout << "Defrag mesh\n";
+
     //resize/allocate up front rather than via push_backs
     m_defragged_vertex_map.resize(get_num_vertices());
     
@@ -465,8 +486,6 @@ void SurfTrack::defrag_mesh( )
                     if ( triangle[1] == i ) { triangle[1] = j; }
                     if ( triangle[2] == i ) { triangle[2] = j; }
                     
-                    //remove_triangle(inc_tris[t]);       // mark the triangle deleted
-                    //add_triangle(triangle, tri_label);  // add the updated triangle
                     renumber_triangle(inc_tris[t], triangle);
                 }
                 
