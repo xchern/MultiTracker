@@ -1,19 +1,19 @@
 scene			Noise
-time-step		0.1
+time-step		0.01
 simulation-time		24.0
 
 remeshing-resolution	0.1
 remeshing-iterations	1
     
-lostopos-collision-epsilon-fraction 0.1
+lostopos-collision-epsilon-fraction 0.01
 lostopos-merge-proximity-epsilon-fraction 0.1
-lostopos-perform-smoothing 0
-lostopos-max-volume-change-fraction 0.1
+lostopos-perform-smoothing 1
+lostopos-max-volume-change-fraction 1.0
 lostopos-min-triangle-angle 3
 lostopos-max-triangle-angle 177
 lostopos-large-triangle-angle-to-split 160
 lostopos-min-triangle-area-fraction 0.001
-lostopos-t1-transition-enabled 0
+lostopos-t1-transition-enabled 1
 lostopos-t1-pull-apart-distance-fraction 0.1
 lostopos-smooth-subdivision 1
 lostopos-allow-non-manifold 1
