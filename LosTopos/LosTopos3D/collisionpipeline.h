@@ -171,6 +171,7 @@ private:
     friend class DynamicSurface;
     friend class EdgeCollapser;
     friend class MeshSnapper;
+    friend class MeshSmoother;
 
     /// Apply a collision implulse between two edges
     /// 

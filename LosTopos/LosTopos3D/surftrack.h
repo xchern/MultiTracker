@@ -698,6 +698,7 @@ public:
         virtual void facesplit(const SurfTrack & st, size_t f) { }
         virtual void snap(const SurfTrack & st, size_t v0, size_t v1) { }
         virtual void smoothing(const SurfTrack & st) { }
+        virtual void smooth(const SurfTrack& st, size_t v) { }
         virtual std::ostream & log() { return std::cout; }
     };
     
