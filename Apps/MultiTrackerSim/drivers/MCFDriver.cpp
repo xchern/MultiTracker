@@ -30,6 +30,10 @@ bool MCFDriver::step(SurfTrack * st, double dt, bool bbwall)
 
         for (size_t i = 0; i < st->m_mesh.nv(); i++)
         {
+           if (st->m_mesh.vertex_is_deleted(i)) {
+              st->set_newposition(i, st->get_position(i));
+              continue;
+           }
             Vec3d m = st->m_masses[i];
             Vec3d newpos = st->get_position(i) + Vec3d(v[i][0] / m[0], v[i][1] / m[1], v[i][2] / m[2]) * dt_largest_possible;
             assert(newpos == newpos);
@@ -57,6 +61,8 @@ double MCFDriver::determineMaxDt(SurfTrack * st, std::vector<Vec3d> & v)
     double global_max_dt = 1.0;
     for (size_t i = 0; i < st->m_mesh.ne(); i++)
     {
+       if (st->m_mesh.edge_is_deleted(i))
+          continue;
         size_t v0 = st->m_mesh.m_edges[i][0];
         size_t v1 = st->m_mesh.m_edges[i][1];
         Vec3d edge = st->get_position(v1) - st->get_position(v0);
@@ -83,6 +89,9 @@ void MCFDriver::evaluateV(LosTopos::SurfTrack * st, std::vector<LosTopos::Vec3d>
     v.resize(st->m_mesh.nv(), Vec3d(0, 0, 0));
     for (size_t i = 0; i < st->m_mesh.nt(); i++)
     {
+       if (st->m_mesh.triangle_is_deleted(i))
+          continue;
+
         Vec3d p0 = st->get_position(st->m_mesh.m_tris[i][0]);
         Vec3d p1 = st->get_position(st->m_mesh.m_tris[i][1]);
         Vec3d p2 = st->get_position(st->m_mesh.m_tris[i][2]);
