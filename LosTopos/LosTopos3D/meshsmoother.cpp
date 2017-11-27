@@ -422,7 +422,7 @@ void MeshSmoother::null_space_smooth_vertex( size_t v,
        {
           triangle_areas[t] = m_surf.get_triangle_area(t);
           triangle_normals[t] = m_surf.get_triangle_normal(t);
-          triangle_centroids[t] = m_surf.get_position(tri[0]) + m_surf.get_position(tri[1]) + m_surf.get_position(tri[2]) / 3;
+          triangle_centroids[t] = (m_surf.get_position(tri[0]) + m_surf.get_position(tri[1]) + m_surf.get_position(tri[2])) / 3.0;
        }
     }
 
@@ -861,7 +861,7 @@ bool MeshSmoother::null_space_smoothing_pass( double dt )
         }
     }
     else {
-        
+       
         //in aggressive mode, identify only the triangles with bad angles, and smooth all of their vertices (with naive Laplacian smoothing)
         std::vector<bool> smoothed_already(m_surf.get_num_vertices(), false);
         for(size_t i = 0; i < m_surf.m_mesh.num_triangles(); ++i) {
