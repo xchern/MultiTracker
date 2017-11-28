@@ -245,7 +245,6 @@ void MeshSmoother::null_space_smooth_vertex( size_t v,
        Vec3d angles;
        triangle_angles(v0, v1, v2, angles[0], angles[1], angles[2]);
        
-
       //what's a good cutoff here? too tight, not enough smoothing. too loose, costly for no reason.
        const double min_cos = cos(160.0 * M_PI / 180.0);
        const double max_cos = cos(20.0 * M_PI / 180.0);
@@ -256,8 +255,6 @@ void MeshSmoother::null_space_smooth_vertex( size_t v,
           cos_angles[2] < min_cos || cos_angles[2] > max_cos;
        
        if (any_bad_angles_cos) {
-          //std::cout << "Angles: " << angles*180.0/M_PI << std::endl;
-          //std::cout << "Bad angles: " << any_bad_angles_cos << std::endl;
           worth_smoothing = true;
           break;
        }
@@ -274,7 +271,6 @@ void MeshSmoother::null_space_smooth_vertex( size_t v,
     //if we're being aggressive, instead do naive Laplacian smoothing of the vertex and then return.
     if(m_surf.m_aggressive_mode) {
         displacement = get_smoothing_displacement_naive(v, incident_triangles, triangle_areas, triangle_normals, triangle_centroids);
-        std::cout << "1";
     }
     else {
 
@@ -356,17 +352,14 @@ void MeshSmoother::null_space_smooth_vertex( size_t v,
              //This is useful in this case because quadric-based null-space smoothing identifies the tangent plane of the highly folded-triangles, and smooths only in that plane.
              //The result is that the vertices inside the sharp fold are pulled outward, slightly opens up the angle and regularizes the merge curve.
              displacement = get_smoothing_displacement(v, tri_set, triangle_areas, triangle_normals, triangle_centroids);
-             std::cout << "2";
           }
           else {
              displacement = get_smoothing_displacement_dihedral(v, incident_triangles, triangle_areas, triangle_normals, triangle_centroids);
-             std::cout << "3";
           }
 
        }
        else {
           displacement = get_smoothing_displacement_dihedral(v, incident_triangles, triangle_areas, triangle_normals, triangle_centroids);
-          std::cout << "4";
        }
     }
     
