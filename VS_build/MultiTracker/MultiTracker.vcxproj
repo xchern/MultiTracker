@@ -1,0 +1,214 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{7E55D1D8-4649-40ED-B1D9-AD3BACF70BA3}</ProjectGuid>
+    <RootNamespace>MultiTracker</RootNamespace>
+    <ProjectName>LosTopos</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <UseIntelMKL>No</UseIntelMKL>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IntDir>$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\Users\batty\Documents\Research\Projects\MultiTracker\GitHub\MultiTracker\LosTopos\LosTopos3D;C:\Users\batty\Documents\Research\Projects\MultiTracker\GitHub\MultiTracker\LosTopos\common;C:\Users\batty\Documents\Research\Projects\MultiTracker\GitHub\MultiTracker\LosTopos\common\newsparse;C:\Users\batty\Documents\Research\Projects\MultiTracker\GitHub\MultiTracker\LosTopos\common\tunicate;C:\Users\batty\Documents\Libraries\freeglut-2.8.1\include;C:\Users\batty\Documents\Libraries\eigen-3.3.4;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_USE_MATH_DEFINES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>C:\Users\batty\Documents\Libraries\freeglut-2.8.1\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\LosTopos\common\bfstream.cpp" />
+    <ClCompile Include="..\..\LosTopos\common\ccd_wrapper.cpp" />
+    <ClCompile Include="..\..\LosTopos\common\collisionqueries.cpp" />
+    <ClCompile Include="..\..\LosTopos\common\cubic_ccd_wrapper.cpp" />
+    <ClCompile Include="..\..\LosTopos\common\gluvi.cpp" />
+    <ClCompile Include="..\..\LosTopos\common\predicates.cpp" />
+    <ClCompile Include="..\..\LosTopos\common\root_parity_ccd_wrapper.cpp" />
+    <ClCompile Include="..\..\LosTopos\common\runstats.cpp" />
+    <ClCompile Include="..\..\LosTopos\common\tunicate\expansion.cpp" />
+    <ClCompile Include="..\..\LosTopos\common\tunicate\intersection.cpp" />
+    <ClCompile Include="..\..\LosTopos\common\tunicate\interval.cpp" />
+    <ClCompile Include="..\..\LosTopos\common\tunicate\neg.cpp" />
+    <ClCompile Include="..\..\LosTopos\common\tunicate\orientation.cpp" />
+    <ClCompile Include="..\..\LosTopos\common\tunicate\rootparitycollisiontest.cpp" />
+    <ClCompile Include="..\..\LosTopos\common\tunicate\sos_intersection.cpp" />
+    <ClCompile Include="..\..\LosTopos\common\tunicate\sos_orientation.cpp" />
+    <ClCompile Include="..\..\LosTopos\common\wallclocktime.cpp" />
+    <ClCompile Include="..\..\LosTopos\LosTopos3D\accelerationgrid.cpp" />
+    <ClCompile Include="..\..\LosTopos\LosTopos3D\broadphasegrid.cpp" />
+    <ClCompile Include="..\..\LosTopos\LosTopos3D\collisionpipeline.cpp" />
+    <ClCompile Include="..\..\LosTopos\LosTopos3D\dynamicsurface.cpp" />
+    <ClCompile Include="..\..\LosTopos\LosTopos3D\edgecollapser.cpp" />
+    <ClCompile Include="..\..\LosTopos\LosTopos3D\edgeflipper.cpp" />
+    <ClCompile Include="..\..\LosTopos\LosTopos3D\edgesplitter.cpp" />
+    <ClCompile Include="..\..\LosTopos\LosTopos3D\facesplitter.cpp" />
+    <ClCompile Include="..\..\LosTopos\LosTopos3D\impactzonesolver.cpp" />
+    <ClCompile Include="..\..\LosTopos\LosTopos3D\iomesh.cpp" />
+    <ClCompile Include="..\..\LosTopos\LosTopos3D\meshcutter.cpp" />
+    <ClCompile Include="..\..\LosTopos\LosTopos3D\meshmerger.cpp" />
+    <ClCompile Include="..\..\LosTopos\LosTopos3D\meshpincher.cpp" />
+    <ClCompile Include="..\..\LosTopos\LosTopos3D\meshrenderer.cpp" />
+    <ClCompile Include="..\..\LosTopos\LosTopos3D\meshsmoother.cpp" />
+    <ClCompile Include="..\..\LosTopos\LosTopos3D\meshsnapper.cpp" />
+    <ClCompile Include="..\..\LosTopos\LosTopos3D\nondestructivetrimesh.cpp" />
+    <ClCompile Include="..\..\LosTopos\LosTopos3D\subdivisionscheme.cpp" />
+    <ClCompile Include="..\..\LosTopos\LosTopos3D\surftrack.cpp" />
+    <ClCompile Include="..\..\LosTopos\LosTopos3D\t1transition.cpp" />
+    <ClCompile Include="..\..\LosTopos\LosTopos3D\trianglequality.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\LosTopos\common\array1.h" />
+    <ClInclude Include="..\..\LosTopos\common\array3.h" />
+    <ClInclude Include="..\..\LosTopos\common\bfstream.h" />
+    <ClInclude Include="..\..\LosTopos\common\ccd_defs.h" />
+    <ClInclude Include="..\..\LosTopos\common\ccd_wrapper.h" />
+    <ClInclude Include="..\..\LosTopos\common\collisionqueries.h" />
+    <ClInclude Include="..\..\LosTopos\common\commonoptions.h" />
+    <ClInclude Include="..\..\LosTopos\common\gluvi.h" />
+    <ClInclude Include="..\..\LosTopos\common\mat.h" />
+    <ClInclude Include="..\..\LosTopos\common\predicates.h" />
+    <ClInclude Include="..\..\LosTopos\common\runstats.h" />
+    <ClInclude Include="..\..\LosTopos\common\tunicate\expansion.h" />
+    <ClInclude Include="..\..\LosTopos\common\tunicate\fenv_include.h" />
+    <ClInclude Include="..\..\LosTopos\common\tunicate\interval.h" />
+    <ClInclude Include="..\..\LosTopos\common\tunicate\intervalbase.h" />
+    <ClInclude Include="..\..\LosTopos\common\tunicate\neg.h" />
+    <ClInclude Include="..\..\LosTopos\common\tunicate\rootparitycollisiontest.h" />
+    <ClInclude Include="..\..\LosTopos\common\tunicate\tunicate.h" />
+    <ClInclude Include="..\..\LosTopos\common\util.h" />
+    <ClInclude Include="..\..\LosTopos\common\vec.h" />
+    <ClInclude Include="..\..\LosTopos\common\wallclocktime.h" />
+    <ClInclude Include="..\..\LosTopos\LosTopos3D\accelerationgrid.h" />
+    <ClInclude Include="..\..\LosTopos\LosTopos3D\broadphase.h" />
+    <ClInclude Include="..\..\LosTopos\LosTopos3D\broadphasegrid.h" />
+    <ClInclude Include="..\..\LosTopos\LosTopos3D\collisionpipeline.h" />
+    <ClInclude Include="..\..\LosTopos\LosTopos3D\dynamicsurface.h" />
+    <ClInclude Include="..\..\LosTopos\LosTopos3D\edgecollapser.h" />
+    <ClInclude Include="..\..\LosTopos\LosTopos3D\edgeflipper.h" />
+    <ClInclude Include="..\..\LosTopos\LosTopos3D\edgesplitter.h" />
+    <ClInclude Include="..\..\LosTopos\LosTopos3D\facesplitter.h" />
+    <ClInclude Include="..\..\LosTopos\LosTopos3D\impactzonesolver.h" />
+    <ClInclude Include="..\..\LosTopos\LosTopos3D\iomesh.h" />
+    <ClInclude Include="..\..\LosTopos\LosTopos3D\meshcutter.h" />
+    <ClInclude Include="..\..\LosTopos\LosTopos3D\meshmerger.h" />
+    <ClInclude Include="..\..\LosTopos\LosTopos3D\meshpincher.h" />
+    <ClInclude Include="..\..\LosTopos\LosTopos3D\meshrenderer.h" />
+    <ClInclude Include="..\..\LosTopos\LosTopos3D\meshsmoother.h" />
+    <ClInclude Include="..\..\LosTopos\LosTopos3D\meshsnapper.h" />
+    <ClInclude Include="..\..\LosTopos\LosTopos3D\nondestructivetrimesh.h" />
+    <ClInclude Include="..\..\LosTopos\LosTopos3D\options.h" />
+    <ClInclude Include="..\..\LosTopos\LosTopos3D\subdivisionscheme.h" />
+    <ClInclude Include="..\..\LosTopos\LosTopos3D\surftrack.h" />
+    <ClInclude Include="..\..\LosTopos\LosTopos3D\t1transition.h" />
+    <ClInclude Include="..\..\LosTopos\LosTopos3D\trianglequality.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
