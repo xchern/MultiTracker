@@ -90,7 +90,8 @@ bool EdgeFlipper::flip_introduces_collision( size_t edge_index,
     //
     
     minmax( xs[new_triangle_a[0]], xs[new_triangle_a[1]], xs[new_triangle_a[2]], low, high );
-    std::vector<size_t> overlapping_edges;
+    static std::vector<size_t> overlapping_edges(10);
+	overlapping_edges.clear();
     m_surf.m_broad_phase->get_potential_edge_collisions( low, high, true, true, overlapping_edges );
     
     for ( size_t i = 0; i < overlapping_edges.size(); ++i )
@@ -133,7 +134,8 @@ bool EdgeFlipper::flip_introduces_collision( size_t edge_index,
     //
     
     minmax( xs[new_edge[0]], xs[new_edge[1]], low, high );
-    std::vector<size_t> overlapping_triangles;
+    static std::vector<size_t> overlapping_triangles(10);
+	overlapping_triangles.clear();
     m_surf.m_broad_phase->get_potential_triangle_collisions( low, high, true, true, overlapping_triangles );
     
     for ( size_t i = 0; i <  overlapping_triangles.size(); ++i )

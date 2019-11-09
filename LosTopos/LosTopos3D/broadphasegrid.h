@@ -142,6 +142,14 @@ public:
                                               bool return_solid,
                                               bool return_dynamic,
                                               std::vector<size_t>& overlapping_edges );
+
+	/// Get the set of edges whose bounding volumes overlap the specified bounding volume
+	///
+	inline void get_potential_edge_collisions_along_segment(const Vec3d& start,
+		const Vec3d& end,
+		bool return_solid,
+		bool return_dynamic,
+		std::vector<size_t>& overlapping_edges);
     
     /// Get the set of triangles whose bounding volumes overlap the specified bounding volume
     ///
@@ -370,6 +378,25 @@ inline void BroadPhaseGrid::get_potential_edge_collisions( const Vec3d& aabb_low
     {
         m_dynamic_edge_grid.find_overlapping_elements( aabb_low, aabb_high, overlapping_edges );
     }
+}
+
+inline void BroadPhaseGrid::get_potential_edge_collisions_along_segment(const Vec3d& start,
+	const Vec3d& end,
+	bool return_solid,
+	bool return_dynamic,
+	std::vector<size_t>& overlapping_edges)
+{
+
+
+	if (return_solid)
+	{
+		m_solid_edge_grid.find_overlapping_elements_along_segment(start, end, overlapping_edges);
+	}
+
+	if (return_dynamic)
+	{
+		m_dynamic_edge_grid.find_overlapping_elements_along_segment(start, end, overlapping_edges);
+	}
 }
 
 // --------------------------------------------------------

@@ -80,7 +80,7 @@ namespace {
     class CCollisionCandidateSetLT
     {
     public:
-        bool operator () (const Vec3st & a, const Vec3st & b)
+        bool operator () (const Vec3st & a, const Vec3st & b) const
         {
             return CollisionCandidateSetLT(a, b);
         }
@@ -342,6 +342,36 @@ void CollisionPipeline::add_edge_candidates( size_t e,
         collision_candidates.push_back( Vec3st(e, candidate_edges[j], 1) );
     }
 }
+
+// ---------------------------------------------------------
+///
+/// Add edge-edge collision candidates for a specified edge using new functionality
+///
+// ---------------------------------------------------------
+
+//void CollisionPipeline::add_edge_candidates(size_t e,
+//	bool return_solid,
+//	bool return_dynamic,
+//	CollisionCandidateSet& collision_candidates)
+//{
+//	Vec2st edge_data = m_surface.m_mesh.m_edges[e];
+//	Vec3d startpos = m_surface.get_position(edge_data[0]);
+//	Vec3d endpos = m_surface.get_position(edge_data[1]);
+//	
+//	//fudge the range a little bit for safety
+//	startpos = startpos - 1e-7*(endpos - startpos);
+//	endpos = endpos + 1e-7*(endpos - startpos);
+//
+//	static std::vector<size_t> candidate_edges(10);
+//	candidate_edges.clear();
+//	m_broadphase.get_potential_edge_collisions_along_segment(startpos, endpos, return_solid, return_dynamic, candidate_edges);
+//
+//	for (size_t j = 0; j < candidate_edges.size(); j++)
+//	{
+//		collision_candidates.push_back(Vec3st(e, candidate_edges[j], 1));
+//	}
+//}
+
 
 // ---------------------------------------------------------
 ///
@@ -1201,7 +1231,9 @@ bool CollisionPipeline::handle_collisions(double dt)
 //    CollisionCandidateSet::iterator new_end = std::unique(update_collision_candidates.begin(), update_collision_candidates.end());
 //    update_collision_candidates.erase(new_end, update_collision_candidates.end());
    
-   std::set<Vec3st, CCollisionCandidateSetLT> candidate_set(update_collision_candidates.begin(), update_collision_candidates.end());
+	
+	std::set<Vec3st, CCollisionCandidateSetLT> candidate_set;
+	candidate_set.insert(update_collision_candidates.begin(), update_collision_candidates.end());
    update_collision_candidates.assign(candidate_set.begin(), candidate_set.end());
    
     // now wind down the update_collision_candidates list

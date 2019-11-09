@@ -307,7 +307,8 @@ void DynamicSurface::get_triangle_intersections( const Vec3d& segment_point_a,
     //TODO Use some kind of line-drawing algorithm to find a sequence of acceleration grid cells that overlap/enclose 
     //the segment, to avoid having to search massive chunks of the mesh.
     
-    std::vector<size_t> overlapping_triangles;
+	static std::vector<size_t> overlapping_triangles(10);
+	overlapping_triangles.clear();
     m_broad_phase->get_potential_triangle_collisions( aabb_low, aabb_high, true, true, overlapping_triangles );
     
     for ( size_t i = 0; i < overlapping_triangles.size(); ++i )
@@ -897,6 +898,7 @@ void DynamicSurface::integrate( double desired_dt, double& actual_dt )
 
 void DynamicSurface::rebuild_static_broad_phase()
 {
+	std::cout << "Rebuild static\n";
     assert( m_collision_safety );
     if(m_verbose)
       std::cout << "Rebuilding broad phase\n";
@@ -914,6 +916,7 @@ void DynamicSurface::rebuild_static_broad_phase()
 
 void DynamicSurface::rebuild_continuous_broad_phase()
 {
+	std::cout << "Rebuild continous\n";
     assert( m_collision_safety );
     m_broad_phase->update_broad_phase( *this, true );
 }
@@ -1736,7 +1739,7 @@ void DynamicSurface::get_intersections( bool degeneracy_counts_as_intersection,
     for ( int i = 0; i < (int)m_mesh.num_triangles(); ++i )
     {
         
-       std::vector<size_t> edge_candidates(50);
+        static std::vector<size_t> edge_candidates(20);
 
         bool get_solid_edges = !triangle_is_all_solid(i);
         edge_candidates.clear();

@@ -910,7 +910,8 @@ bool MeshSnapper::snap_pass()
         vmin -= m_surf.m_merge_proximity_epsilon * Vec3d(1,1,1);
         vmax += m_surf.m_merge_proximity_epsilon * Vec3d(1,1,1);
         
-        std::vector<size_t> overlapping_tris;
+        static std::vector<size_t> overlapping_tris(20);
+		overlapping_tris.clear();
         m_surf.m_broad_phase->get_potential_triangle_collisions(vmin, vmax, false, true, overlapping_tris);
         
         for(size_t i = 0; i < overlapping_tris.size(); ++i) {
@@ -935,7 +936,8 @@ bool MeshSnapper::snap_pass()
         vmin -= m_surf.m_merge_proximity_epsilon * Vec3d(1,1,1);
         vmax += m_surf.m_merge_proximity_epsilon * Vec3d(1,1,1);
         
-        std::vector<size_t> overlapping_edges;
+        static std::vector<size_t> overlapping_edges(20);
+		overlapping_edges.clear();
         m_surf.m_broad_phase->get_potential_edge_collisions(vmin, vmax, false, true, overlapping_edges);
         
         for(size_t ind = 0; ind < overlapping_edges.size(); ++ind) {

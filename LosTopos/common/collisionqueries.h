@@ -33,6 +33,9 @@ void check_point_triangle_proximity(const Vec3d &x0, const Vec3d &x1, const Vec3
 
 double signed_volume(const Vec3d &x0, const Vec3d &x1, const Vec3d &x2, const Vec3d &x3);
 
+//adapted from Peter Shirley's ray-aabb test via realtimerendering.com
+bool segment_box_test(const Vec3d&start, const Vec3d& end, const Vec3d& boxmin, const Vec3d& boxmax);
+
 }
 
 #endif

@@ -272,8 +272,9 @@ bool EdgeSplitter::split_edge_pseudo_motion_introduces_intersection( const Vec3d
         edge_aabb_low -= m_surf.m_aabb_padding * Vec3d(1,1,1);
         edge_aabb_high += m_surf.m_aabb_padding * Vec3d(1,1,1);
         
-        std::vector<size_t> overlapping_edges;
-        m_surf.m_broad_phase->get_potential_edge_collisions( edge_aabb_low, edge_aabb_high, true, true, overlapping_edges );
+        static std::vector<size_t> overlapping_edges(10);
+		overlapping_edges.clear();
+		m_surf.m_broad_phase->get_potential_edge_collisions( edge_aabb_low, edge_aabb_high, true, true, overlapping_edges );
         
         std::vector<size_t> vertex_neighbourhood;
         vertex_neighbourhood.push_back(vertex_a); vertex_neighbourhood.push_back(vertex_b);

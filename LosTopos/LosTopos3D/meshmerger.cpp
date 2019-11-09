@@ -561,7 +561,8 @@ bool MeshMerger::merge_pass( )
         emin -= m_surf.m_merge_proximity_epsilon * Vec3d(1,1,1);
         emax += m_surf.m_merge_proximity_epsilon * Vec3d(1,1,1);
         
-        std::vector<size_t> edge_candidates;
+        static std::vector<size_t> edge_candidates(10);
+		edge_candidates.clear();
         m_surf.m_broad_phase->get_potential_edge_collisions( emin, emax, false, true, edge_candidates );
         
         for(size_t j = 0; j < edge_candidates.size(); j++)
