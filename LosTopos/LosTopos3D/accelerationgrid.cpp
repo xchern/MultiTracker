@@ -534,69 +534,6 @@ void AccelerationGrid::find_overlapping_elements( const Vec3d& xmin, const Vec3d
     }
 }
 
-void AccelerationGrid::find_overlapping_elements_along_segment(const Vec3d & startpos, const Vec3d & endpos, std::vector<size_t>& results)
-{
-	++m_lastquery;
-
-	Vec3i xmini, xmaxi;
-	Vec3d xmin, xmax;
-	minmax(startpos,endpos, xmin, xmax);
-	boundstoindices(xmin, xmax, xmini, xmaxi);
-	static int box_total = 0;
-	static int box_hit = 0;
-	for (int k = xmini[2]; k <= xmaxi[2]; ++k)
-	{
-		for (int j = xmini[1]; j <= xmaxi[1]; ++j)
-		{
-			for (int i = xmini[0]; i <= xmaxi[0]; ++i)
-			{
-				++box_total;
-				Vec3d boxstart = m_gridxmin + m_cellsize[0] * Vec3d(i, j, k);
-				Vec3d boxend = boxstart + m_cellsize;
-				if (segment_box_test(startpos, endpos, boxstart,boxend)) {
-					++box_hit;
-					std::vector<size_t>* cell = m_cells(i, j, k);
-
-					if (cell)
-					{
-
-						for (std::vector<size_t>::const_iterator citer = cell->begin(); citer != cell->end(); ++citer)
-						{
-							size_t oidx = *citer;
-
-							// Check if the object has already been found during this query
-
-							if (m_elementquery[oidx] < m_lastquery)
-							{
-
-								// Object has not been found.  Set m_elementquery so that it will not be tested again during this query.
-
-								m_elementquery[oidx] = m_lastquery;
-
-								const Vec3d& oxmin = m_elementxmins[oidx];
-								const Vec3d& oxmax = m_elementxmaxs[oidx];
-
-								if ((xmin[0] <= oxmax[0] && xmin[1] <= oxmax[1] && xmin[2] <= oxmax[2]) &&
-									(xmax[0] >= oxmin[0] && xmax[1] >= oxmin[1] && xmax[2] >= oxmin[2]))
-								{
-									results.push_back(oidx);
-								}
-
-							}
-						}
-					}
-				}
-				else {
-
-				}
-
-			}
-		}
-	}
-	//std::cout << "Hit ratio: " << (double)box_hit / (double)box_total << std::endl;
-}
-
-
 
 }
 

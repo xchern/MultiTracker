@@ -69,11 +69,6 @@ public:
     ///
     void find_overlapping_elements( const Vec3d& xmin, const Vec3d& xmax, std::vector<size_t>& results );
     
-	/// Return the set of elements which have AABBs overlapping the query AABB.
-	///
-	void find_overlapping_elements_along_segment(const Vec3d& startpos, const Vec3d& endpos, std::vector<size_t>& results);
-
-    
     /// Each cell contains an array of indices specifying the elements whose AABBs overlap the cell
     ///
     Array3<std::vector<size_t>* > m_cells;

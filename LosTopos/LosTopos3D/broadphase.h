@@ -131,14 +131,7 @@ public:
                                                bool return_dynamic,
                                                std::vector<size_t>& overlapping_edges ) = 0;
 
-	/// Get the set of edges whose bounding volumes overlap the specified bounding volume
-	///
-	virtual void get_potential_edge_collisions_along_segment(const Vec3d& start,
-		const Vec3d& end,
-		bool return_solid,
-		bool return_dynamic,
-		std::vector<size_t>& overlapping_edges) = 0;
-    
+	   
     /// Get the set of triangles whose bounding volumes overlap the specified bounding volume
     ///
     virtual void get_potential_triangle_collisions( const Vec3d& aabb_low, 
