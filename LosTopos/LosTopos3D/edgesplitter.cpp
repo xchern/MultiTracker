@@ -896,7 +896,7 @@ bool EdgeSplitter::large_angle_split_pass()
         double edge_length = m_surf.get_edge_length(e);
         
         // get triangles incident to the edge
-        std::vector<size_t> incident_tris = mesh.m_edge_to_triangle_map[e];
+        std::vector<size_t>& incident_tris = mesh.m_edge_to_triangle_map[e];
         for(size_t t = 0; t < incident_tris.size(); ++t) {
             if(mesh.triangle_is_deleted(incident_tris[t]))
                 continue;
