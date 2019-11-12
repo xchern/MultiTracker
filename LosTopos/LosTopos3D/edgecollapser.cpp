@@ -1019,7 +1019,8 @@ bool EdgeCollapser::collapse_edge( size_t edge )
 
 bool EdgeCollapser::edge_is_collapsible( size_t edge_index, double& current_length )
 {
-    
+	static double cos_cutoff = cos(deg2rad(m_surf.m_min_triangle_angle));
+
     // skip deleted and solid edges
     if ( m_surf.m_mesh.edge_is_deleted(edge_index) ) { return false; }
     //  if ( m_surf.edge_is_any_solid(edge_index) ) { return false; }
@@ -1039,9 +1040,16 @@ bool EdgeCollapser::edge_is_collapsible( size_t edge_index, double& current_leng
         Vec3d c = m_surf.get_position(vertex_c);
         
         //The current angle is less than our threshold, so try to collapse
-        double cur_angle = acos( dot( normalized(b-c), normalized(a-c) ) );
-        if(rad2deg(cur_angle) < m_surf.m_min_triangle_angle)
-            return true;
+		//double cur_dot = dot(normalized(b - c), normalized(a - c));
+		double cur_dot = ((b[0] - c[0]) * (a[0] - c[0]) + (b[1] - c[1]) * (a[1] - c[1]) + (b[2] - c[2]) * (a[2] - c[2])) 
+				/ sqrt(sqr(b[0] - c[0]) + sqr(b[1] - c[1]) + sqr(b[2] - c[2])) 
+			    / sqrt(sqr(a[0] - c[0]) + sqr(a[1] - c[1]) + sqr(a[2] - c[2]));
+		return cur_dot > cos_cutoff;
+
+		//slow direct way -- silly micro-optimized into the above
+		//double cur_angle = acos(cur_dot);
+		//if(rad2deg(cur_angle) < m_surf.m_min_triangle_angle)
+        //    return true;
     }
     
     current_length = m_surf.get_edge_length(edge_index);
