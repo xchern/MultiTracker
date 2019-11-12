@@ -1041,9 +1041,10 @@ bool EdgeCollapser::edge_is_collapsible( size_t edge_index, double& current_leng
         
         //The current angle is less than our threshold, so try to collapse
 		//double cur_dot = dot(normalized(b - c), normalized(a - c));
-		double cur_dot = ((b[0] - c[0]) * (a[0] - c[0]) + (b[1] - c[1]) * (a[1] - c[1]) + (b[2] - c[2]) * (a[2] - c[2])) 
+		double cur_dot = corner_normalized_dot(a, b, c);
+		/*double cur_dot = ((b[0] - c[0]) * (a[0] - c[0]) + (b[1] - c[1]) * (a[1] - c[1]) + (b[2] - c[2]) * (a[2] - c[2])) 
 				/ sqrt(sqr(b[0] - c[0]) + sqr(b[1] - c[1]) + sqr(b[2] - c[2])) 
-			    / sqrt(sqr(a[0] - c[0]) + sqr(a[1] - c[1]) + sqr(a[2] - c[2]));
+			    / sqrt(sqr(a[0] - c[0]) + sqr(a[1] - c[1]) + sqr(a[2] - c[2]));*/
 		if (cur_dot > cos_cutoff)
 			return true;
 

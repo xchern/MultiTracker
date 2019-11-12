@@ -336,9 +336,9 @@ bool segment_box_test(const Vec3d&start, const Vec3d& end, const Vec3d& boxmin, 
 	double tmin = 0;
 	double tmax = 1;
 	for (int a = 0; a < 3; a++) {
-		float invD = 1.0f / dir[a];
-		float t0 = (boxmin[a] - start[a]) * invD;
-		float t1 = (boxmax[a] - start[a]) * invD;
+		double invD = 1.0f / dir[a];
+		double t0 = (boxmin[a] - start[a]) * invD;
+		double t1 = (boxmax[a] - start[a]) * invD;
 		if (invD < 0.0f)
 			std::swap(t0, t1);
 		tmin = t0 > tmin ? t0 : tmin;

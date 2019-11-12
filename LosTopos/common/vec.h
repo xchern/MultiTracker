@@ -246,97 +246,121 @@ template<unsigned int N, class T>
 void zero(Vec<N,T> &a)
 { 
     for(unsigned int i=0; i<N; ++i)
-        a.v[i] = 0;
+a.v[i] = 0;
 }
 
 template<unsigned int N, class T>
-std::ostream &operator<<(std::ostream &out, const Vec<N,T> &v)
+std::ostream& operator<<(std::ostream& out, const Vec<N, T>& v)
 {
-    out<<v.v[0];
-    for(unsigned int i=1; i<N; ++i)
-        out<<' '<<v.v[i];
-    return out;
+	out << v.v[0];
+	for (unsigned int i = 1; i < N; ++i)
+		out << ' ' << v.v[i];
+	return out;
 }
 
 template<unsigned int N, class T>
-std::istream &operator>>(std::istream &in, Vec<N,T> &v)
+std::istream& operator>>(std::istream& in, Vec<N, T>& v)
 {
-    in>>v.v[0];
-    for(unsigned int i=1; i<N; ++i)
-        in>>v.v[i];
-    return in;
-}
-
-template<unsigned int N, class T> 
-inline bool operator==(const Vec<N,T> &a, const Vec<N,T> &b)
-{ 
-    bool t = (a.v[0] == b.v[0]);
-    unsigned int i=1;
-    while(i<N && t) {
-        t = t && (a.v[i]==b.v[i]); 
-        ++i;
-    }
-    return t;
-}
-
-template<unsigned int N, class T> 
-inline bool operator!=(const Vec<N,T> &a, const Vec<N,T> &b)
-{ 
-    bool t = (a.v[0] != b.v[0]);
-    unsigned int i=1;
-    while(i<N && !t) {
-        t = t || (a.v[i]!=b.v[i]); 
-        ++i;
-    }
-    return t;
+	in >> v.v[0];
+	for (unsigned int i = 1; i < N; ++i)
+		in >> v.v[i];
+	return in;
 }
 
 template<unsigned int N, class T>
-inline Vec<N,T> operator*(T a, const Vec<N,T> &v)
+inline bool operator==(const Vec<N, T>& a, const Vec<N, T>& b)
 {
-    Vec<N,T> w(v);
-    w*=a;
-    return w;
+	bool t = (a.v[0] == b.v[0]);
+	unsigned int i = 1;
+	while (i < N && t) {
+		t = t && (a.v[i] == b.v[i]);
+		++i;
+	}
+	return t;
 }
 
 template<unsigned int N, class T>
-inline T min(const Vec<N,T> &a)
+inline bool operator!=(const Vec<N, T>& a, const Vec<N, T>& b)
 {
-    T m=a.v[0];
-    for(unsigned int i=1; i<N; ++i) if(a.v[i]<m) m=a.v[i];
-    return m;
+	bool t = (a.v[0] != b.v[0]);
+	unsigned int i = 1;
+	while (i < N && !t) {
+		t = t || (a.v[i] != b.v[i]);
+		++i;
+	}
+	return t;
 }
 
 template<unsigned int N, class T>
-inline Vec<N,T> min_union(const Vec<N,T> &a, const Vec<N,T> &b)
+inline Vec<N, T> operator*(T a, const Vec<N, T>& v)
 {
-    Vec<N,T> m;
-    for(unsigned int i=0; i<N; ++i) (a.v[i] < b.v[i]) ? m.v[i]=a.v[i] : m.v[i]=b.v[i];
-    return m;
+	Vec<N, T> w(v);
+	w *= a;
+	return w;
 }
 
 template<unsigned int N, class T>
-inline Vec<N,T> max_union(const Vec<N,T> &a, const Vec<N,T> &b)
+inline T min(const Vec<N, T>& a)
 {
-    Vec<N,T> m;
-    for(unsigned int i=0; i<N; ++i) (a.v[i] > b.v[i]) ? m.v[i]=a.v[i] : m.v[i]=b.v[i];
-    return m;
+	T m = a.v[0];
+	for (unsigned int i = 1; i < N; ++i) if (a.v[i] < m) m = a.v[i];
+	return m;
 }
 
 template<unsigned int N, class T>
-inline T max(const Vec<N,T> &a)
+inline Vec<N, T> min_union(const Vec<N, T>& a, const Vec<N, T>& b)
 {
-    T m=a.v[0];
-    for(unsigned int i=1; i<N; ++i) if(a.v[i]>m) m=a.v[i];
-    return m;
+	Vec<N, T> m;
+	for (unsigned int i = 0; i < N; ++i) (a.v[i] < b.v[i]) ? m.v[i] = a.v[i] : m.v[i] = b.v[i];
+	return m;
 }
 
 template<unsigned int N, class T>
-inline T dot(const Vec<N,T> &a, const Vec<N,T> &b)
+inline Vec<N, T> max_union(const Vec<N, T>& a, const Vec<N, T>& b)
 {
-    T d=a.v[0]*b.v[0];
-    for(unsigned int i=1; i<N; ++i) d+=a.v[i]*b.v[i];
-    return d;
+	Vec<N, T> m;
+	for (unsigned int i = 0; i < N; ++i) (a.v[i] > b.v[i]) ? m.v[i] = a.v[i] : m.v[i] = b.v[i];
+	return m;
+}
+
+template<unsigned int N, class T>
+inline T max(const Vec<N, T>& a)
+{
+	T m = a.v[0];
+	for (unsigned int i = 1; i < N; ++i) if (a.v[i] > m) m = a.v[i];
+	return m;
+}
+
+template<unsigned int N, class T>
+inline T dot(const Vec<N, T>& a, const Vec<N, T>& b)
+{
+	T d = a.v[0] * b.v[0];
+	for (unsigned int i = 1; i < N; ++i) d += a.v[i] * b.v[i];
+	return d;
+}
+
+template<unsigned int N, class T>
+inline T corner_normalized_dot(const Vec<N, T>& a, const Vec<N, T>& b, const Vec<N, T>& c) {
+	//We want to compute this efficiently
+	//return dot(normalized(b - c), normalized(a - c));
+
+	//this is the special case for N = 3
+	//return ((b[0] - c[0]) * (a[0] - c[0]) + (b[1] - c[1]) * (a[1] - c[1]) + (b[2] - c[2]) * (a[2] - c[2]))
+	//	/ sqrt(sqr(b[0] - c[0]) + sqr(b[1] - c[1]) + sqr(b[2] - c[2]))
+	//	/ sqrt(sqr(a[0] - c[0]) + sqr(a[1] - c[1]) + sqr(a[2] - c[2]));
+	
+	//General case
+	T numer = 0;
+	T denom1 = 0;
+	T denom2 = 0;
+	for (int i = 0; i < N; ++i) {
+		T termb = b[i] - c[i];
+		T terma = a[i] - c[i];
+		numer += (termb) * (terma);
+		denom1 += sqr(termb);
+	    denom2 += sqr(terma);
+	}
+	return numer / sqrt(denom1) / sqrt(denom2);
 }
 
 template<class T> 
