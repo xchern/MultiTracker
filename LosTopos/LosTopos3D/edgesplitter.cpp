@@ -911,23 +911,26 @@ bool EdgeSplitter::large_angle_split_pass()
             
             // compute the angle at each opposite vertex
             const Vec3d& opposite_point0 = m_surf.get_position(opposite0);
-            //double acos_input = dot( normalized(edge_point0-opposite_point0), normalized(edge_point1-opposite_point0) );
-			double acos_input = corner_normalized_dot(edge_point0, edge_point1, opposite_point0);
-            if (acos_input != acos_input || acos_input <= -1 || acos_input >= 1) {
-                std::cout << "Value: " << acos_input << std::endl;
+            
+			double corner_angle_dot = corner_normalized_dot(edge_point0, edge_point1, opposite_point0);
+            if (corner_angle_dot != corner_angle_dot || corner_angle_dot <= -1 || corner_angle_dot >= 1) {
+                std::cout << "Value: " << corner_angle_dot << std::endl;
                 std::cout << "edgepoint0:" << edge_point0 << "  edge_point1: " << edge_point1 << "   Opp0:" << opposite_point0 << std::endl;
                 std::cout << "Difone: " << edge_point0-opposite_point0 <<  "  Diftwo: " << edge_point1-opposite_point0 << std::endl;
                 std::cout << "Left: " << mag(edge_point0-opposite_point0)  <<  "  Right: " << mag(edge_point1-opposite_point0) << std::endl;
             }
-            //double angle0 = rad2deg( acos( acos_input ) );
-            
+			
+			//Below is the old logic -- slow because it uses acos, unnecessarily
+			//double acos_input = dot( normalized(edge_point0-opposite_point0), normalized(edge_point1-opposite_point0) );
+            //double angle0 = rad2deg( acos( corner_angle_dot ) );
+			//if ( !m_surf.m_aggressive_mode && angle0 > m_surf.m_large_triangle_angle_to_split ||
+				//angle0 > m_surf.m_max_triangle_angle)
+
             // if an angle is above the max threshold, split the edge
             
-            //if aggressive, use hard max, otherwise use soft max
-            //if ( !m_surf.m_aggressive_mode && angle0 > m_surf.m_large_triangle_angle_to_split ||
-                //angle0 > m_surf.m_max_triangle_angle)
-			if (!m_surf.m_aggressive_mode && acos_input < large_angle_split_cos_bound ||
-				acos_input < max_tri_angle_cos_bound)
+			//if aggressive mode, use hard max, otherwise use soft max
+			if (!m_surf.m_aggressive_mode && corner_angle_dot < large_angle_split_cos_bound ||
+				corner_angle_dot < max_tri_angle_cos_bound)
             {
                 if (!edge_is_splittable(e))
                     continue;

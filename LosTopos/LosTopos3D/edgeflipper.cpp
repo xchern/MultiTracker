@@ -336,17 +336,7 @@ bool EdgeFlipper::flip_edge( size_t edge,
         }
     }
     
-    // --------------
-    
-    // Prevent intersection
-    if ( m_surf.m_collision_safety && flip_introduces_collision( edge, new_edge, new_triangle0, new_triangle1 ) )
-    {
-        if ( m_surf.m_verbose ) { std::cout << "edge flip rejected: intersection" << std::endl; }
-        
-        g_stats.add_to_int( "EdgeFlipper:edge_flip_collision", 1 );
-        return false;
-    }
-    
+   
     // --------------
     
     // Prevent degenerate triangles
@@ -445,7 +435,17 @@ bool EdgeFlipper::flip_edge( size_t edge,
         g_stats.add_to_int( "EdgeFlipper:edge_flip_bad_angle", 1 );
         return false;
     }
-    
+	// --------------
+
+   // Prevent intersection
+	if (m_surf.m_collision_safety && flip_introduces_collision(edge, new_edge, new_triangle0, new_triangle1))
+	{
+		if (m_surf.m_verbose) { std::cout << "edge flip rejected: intersection" << std::endl; }
+
+		g_stats.add_to_int("EdgeFlipper:edge_flip_collision", 1);
+		return false;
+	}
+
     // --------------
     
     // Okay, now do the actual operation
