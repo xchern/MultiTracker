@@ -669,8 +669,13 @@ bool EdgeFlipper::flip_pass( )
     //it is indexed per vertex, and it stores the number of edges counts and a corresponding region pair
     //consistent with a call to "edge_count_bordering_region_pair" (which is a bit costly)
     std::vector<std::pair<int, Vec2i>> edge_counts_by_region_pair(m_surf.get_num_vertices(), std::make_pair(-1, Vec2i(-1,-1)));
+	
+	//a cache storing which vertices are nonmanifold, consistent with is_vertex_nonmanifold function call, that is a bit costly
+	std::vector<bool> is_vertex_nonmanifold(m_surf.get_num_vertices(), false);
+	for (int v = 0; v < m_surf.get_num_vertices(); ++v)
+		is_vertex_nonmanifold[v] = m_mesh.is_vertex_nonmanifold(v);
 
-    while ( flip_occurred && num_flip_passes++ < MAX_NUM_FLIP_PASSES )
+	while ( flip_occurred && num_flip_passes++ < MAX_NUM_FLIP_PASSES )
     {
         if ( m_surf.m_verbose )
         {
@@ -804,11 +809,22 @@ bool EdgeFlipper::flip_pass( )
                 //See e.g. https://code.google.com/p/stacker/source/browse/trunk/GraphicsLibrary/Remeshing/LaplacianRemesher.h
                 
                 
-                int opt_val_a = m_mesh.is_vertex_nonmanifold(third_vertex_0)?4:(m_mesh.m_is_boundary_vertex[third_vertex_0]?4:6), 
+				//this is the direct computation, but we think it's slow.
+                /*int opt_val_a = m_mesh.is_vertex_nonmanifold(third_vertex_0)?4:(m_mesh.m_is_boundary_vertex[third_vertex_0]?4:6), 
                 opt_val_b = m_mesh.is_vertex_nonmanifold(third_vertex_1)?4:(m_mesh.m_is_boundary_vertex[third_vertex_1]?4:6),
                 opt_val_0 = m_mesh.is_vertex_nonmanifold(vert_0)?4:(m_mesh.m_is_boundary_vertex[vert_0]?4:6), 
-                opt_val_1 = m_mesh.is_vertex_nonmanifold(vert_1)?4:(m_mesh.m_is_boundary_vertex[vert_1]?4:6);
+                opt_val_1 = m_mesh.is_vertex_nonmanifold(vert_1)?4:(m_mesh.m_is_boundary_vertex[vert_1]?4:6);*/
                 
+				//this is using the cache for speed.
+				int opt_val_a = is_vertex_nonmanifold[third_vertex_0] ? 4 : (m_mesh.m_is_boundary_vertex[third_vertex_0] ? 4 : 6),
+					opt_val_b = is_vertex_nonmanifold[third_vertex_1] ? 4 : (m_mesh.m_is_boundary_vertex[third_vertex_1] ? 4 : 6),
+					opt_val_0 = is_vertex_nonmanifold[vert_0] ? 4 : (m_mesh.m_is_boundary_vertex[vert_0] ? 4 : 6),
+					opt_val_1 = is_vertex_nonmanifold[vert_1] ? 4 : (m_mesh.m_is_boundary_vertex[vert_1] ? 4 : 6);
+				/*assert(opt_val_a == opt_val_b_new);
+				assert(opt_val_b == opt_val_b_new);
+				assert(opt_val_0 == opt_val_0_new);
+				assert(opt_val_1 == opt_val_1_new);*/
+
                 int val_a, val_b, val_0, val_1;
                 Vec2i region_pair = m_mesh.get_triangle_label(triangle_a); //doesn't matter which triangle we consider.
                 
@@ -858,7 +874,7 @@ bool EdgeFlipper::flip_pass( )
             }
             
             if (flipped && !m_use_Delaunay_criterion) {
-               //a flip happened, so update our cache
+               //a flip happened, so update our caches
                Vec2i region_pair = m_mesh.get_triangle_label(triangle_a);
                int val_0 = edge_count_bordering_region_pair(vert_0, region_pair);
                int val_1 = edge_count_bordering_region_pair(vert_1, region_pair);
@@ -869,6 +885,11 @@ bool EdgeFlipper::flip_pass( )
                edge_counts_by_region_pair[vert_1].first = val_1; edge_counts_by_region_pair[vert_1].second = region_pair;
                edge_counts_by_region_pair[third_vertex_0].first = val_a; edge_counts_by_region_pair[third_vertex_0].second = region_pair;
                edge_counts_by_region_pair[third_vertex_1].first = val_b; edge_counts_by_region_pair[third_vertex_1].second = region_pair;
+
+			   is_vertex_nonmanifold[third_vertex_0] = m_mesh.is_vertex_nonmanifold(third_vertex_0);
+			   is_vertex_nonmanifold[third_vertex_1] = m_mesh.is_vertex_nonmanifold(third_vertex_1);
+			   is_vertex_nonmanifold[vert_0] = m_mesh.is_vertex_nonmanifold(vert_0);
+			   is_vertex_nonmanifold[vert_1] = m_mesh.is_vertex_nonmanifold(vert_1);
             }
 
             flip_occurred |= flipped;            
