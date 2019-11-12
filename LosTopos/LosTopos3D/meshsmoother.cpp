@@ -242,8 +242,8 @@ void MeshSmoother::null_space_smooth_vertex( size_t v,
        Vec3d cos_angles;
        triangle_angle_cosines(v0, v1, v2, cos_angles[0], cos_angles[1], cos_angles[2]);
 
-       Vec3d angles;
-       triangle_angles(v0, v1, v2, angles[0], angles[1], angles[2]);
+       //Vec3d angles;
+       //triangle_angles(v0, v1, v2, angles[0], angles[1], angles[2]);
        
       //what's a good cutoff here? too tight, not enough smoothing. too loose, costly for no reason.
        const double min_cos = cos(160.0 * M_PI / 180.0);
