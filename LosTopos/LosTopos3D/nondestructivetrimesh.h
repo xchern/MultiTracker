@@ -129,6 +129,8 @@ public:
     /// Efficiently renumber a triangle whose vertex numbers have changed, but the geometry has not. (For defragging.)
     ///
     void nondestructive_renumber_triangle(size_t tri, const Vec3st& verts);
+
+	void nondestructive_renumber_triangle_new(size_t tri, const Vec3st& verts);
     
     /// Add a vertex, update connectivity.  Return index of new vertex.
     ///
@@ -407,12 +409,12 @@ inline Vec3st sort_triangle( const Vec3st& t )
 
 inline size_t NonDestructiveTriMesh::get_third_vertex( size_t vertex0, size_t vertex1, const Vec3st& triangle ) const
 {
-    if ( !( ( triangle[0] == vertex0 || triangle[1] == vertex0 || triangle[2] == vertex0 ) && ( triangle[0] == vertex1 || triangle[1] == vertex1 || triangle[2] == vertex1 ) ) )
+    /*if ( !( ( triangle[0] == vertex0 || triangle[1] == vertex0 || triangle[2] == vertex0 ) && ( triangle[0] == vertex1 || triangle[1] == vertex1 || triangle[2] == vertex1 ) ) )
     {
         std::cout << "tri: " << triangle << std::endl;
         std::cout << "v0: " << vertex0 << ", v1: " << vertex1 << std::endl;
         assert(false);
-    }
+    }*/
     
     if ( triangle[0] == vertex0 )
     {

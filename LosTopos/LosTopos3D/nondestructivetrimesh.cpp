@@ -316,6 +316,7 @@ void NonDestructiveTriMesh::nondestructive_renumber_triangle(size_t tri, const V
 
 }
 
+
 // --------------------------------------------------------
 ///
 /// Add a vertex, update connectivity.  Return index of new vertex.

@@ -234,10 +234,13 @@ void AccelerationGrid::add_element(size_t idx, const Vec3d& xmin, const Vec3d& x
            {
                 std::vector<size_t>*& cell = m_cells(cur_index[0], cur_index[1], cur_index[2]);
                 if(!cell) {
-                    cell = new std::vector<size_t>();
-                    cell->reserve(10);
+                    //cell = new std::vector<size_t>();
+                    //cell->reserve(10);
+					//cell = new std::vector<size_t>(10);
+					//cell->clear();
+					cell = new_cell_vector();
                 }
-                
+				
                 cell->push_back(idx);
                 m_elementidxs[idx].push_back(Vec3st(cur_index));
             }
@@ -361,8 +364,9 @@ void AccelerationGrid::update_element(size_t idx, const Vec3d& xmin, const Vec3d
                   if(!in_old) { //not in old, we need to add it
                      std::vector<size_t>*& cell = m_cells(cur_index[0], cur_index[1], cur_index[2]);
                      if(!cell) {
-                        cell = new std::vector<size_t>();
-                        cell->reserve(10);
+                        //cell = new std::vector<size_t>();
+                        //cell->reserve(10);
+						cell = new_cell_vector();
                      }
 
                      cell->push_back(idx);
@@ -426,8 +430,9 @@ void AccelerationGrid::update_element(size_t idx, const Vec3d& xmin, const Vec3d
             {
                std::vector<size_t>*& cell = m_cells(cur_index[0], cur_index[1], cur_index[2]);
                if(!cell) {
-                  cell = new std::vector<size_t>();
-                  cell->reserve(10);
+                  //cell = new std::vector<size_t>();
+                  //cell->reserve(10);
+				  cell = new_cell_vector();
                }
 
                cell->push_back(idx);
@@ -452,7 +457,8 @@ void AccelerationGrid::clear()
         std::vector<size_t>*& cell = m_cells.a[i];  
         if(cell)
         {
-            delete cell;
+            //delete cell;
+			return_cell_vector(m_cells.a[i]);
             cell = 0;
         }
     }
@@ -503,9 +509,10 @@ void AccelerationGrid::find_overlapping_elements( const Vec3d& xmin, const Vec3d
                 if(cell)
                 {
 
-                    for( std::vector<size_t>::const_iterator citer = cell->begin(); citer != cell->end(); ++citer)
-                    {
-                        size_t oidx = *citer;
+                    //for( std::vector<size_t>::const_iterator citer = cell->begin(); citer != cell->end(); ++citer)
+                    //{
+                    //    size_t oidx = *citer;
+					for(auto& oidx : *cell) {
                         
                         // Check if the object has already been found during this query
                         
@@ -532,6 +539,28 @@ void AccelerationGrid::find_overlapping_elements( const Vec3d& xmin, const Vec3d
             }
         }
     }
+}
+
+/// Get a new cell vector 
+///
+std::vector<size_t>* AccelerationGrid::new_cell_vector() {
+	std::vector<size_t>* result = 0;
+	if (m_cell_vector_pool.size() != 0) {
+		result = m_cell_vector_pool.back();
+		m_cell_vector_pool.pop_back();
+		return result;
+	}
+	else {
+		return new std::vector<size_t>();
+	}
+	
+}
+
+/// Return a cell vector to the pool
+///
+void AccelerationGrid::return_cell_vector(std::vector<size_t>* cell_vector) {
+	cell_vector->clear();
+	m_cell_vector_pool.push_back(cell_vector);
 }
 
 

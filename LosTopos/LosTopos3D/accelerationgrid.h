@@ -69,6 +69,15 @@ public:
     ///
     void find_overlapping_elements( const Vec3d& xmin, const Vec3d& xmax, std::vector<size_t>& results );
     
+	/// Get a new cell vector 
+	///
+	std::vector<size_t>* new_cell_vector();
+
+	/// Return a cell vector to the pool
+	///
+	void return_cell_vector(std::vector<size_t>* cell_vector);
+
+
     /// Each cell contains an array of indices specifying the elements whose AABBs overlap the cell
     ///
     Array3<std::vector<size_t>* > m_cells;
@@ -105,6 +114,10 @@ public:
     ///
     size_t m_elementcount;
 
+	/// Cell vector pool -- a pool to store currently unused vectors, so we don't have to
+	/// allocate and reallocate them all the time.
+	///
+	std::vector<std::vector<size_t>* > m_cell_vector_pool;
     
     
 };
