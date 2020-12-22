@@ -1,0 +1,17 @@
+SRC = ..
+EIGEN_INCLUDE = /usr/include/eigen3/
+INCLUDE = -I$EIGEN_INCLUDE -I$SRC/LosTopos/LosTopos3D -I$SRC/LosTopos/common -I$SRC/LosTopos/common/tunicate -I$SRC/LosTopos/common/newsparse
+LINKFLAGS = -lGL -lglut -lGLU
+
+CPPFLAGS = -g
+
+rule cpp
+    command = g++ -MD -MF $out.dep $CPPFLAGS $INCLUDE -c $in -o $out
+    depfile = $out.dep
+    deps = gcc
+
+rule link_library
+    command = ar rcs $out $in
+
+rule link_executable
+    command = g++ $LINKFLAGS $in -o $out
